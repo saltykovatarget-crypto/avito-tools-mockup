@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Авитолог PRO — Мониторинг</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:#f5f5f7;color:#111}
+
+/* NAV */
+.nav{display:flex;gap:8px;padding:16px 24px;background:#fff;border-bottom:1px solid #e5e5e5;align-items:center}
+.nav-btn{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:#f0f0f0;color:#555;transition:.15s}
+.nav-btn.active{background:#5B47E0;color:#fff}
+.nav-label{font-size:12px;color:#999;margin-left:8px}
+
+/* SCREENS */
+.screen{display:none;height:calc(100vh - 57px)}
+.screen.active{display:flex}
+
+/* ═══════ ЭКРАН 1: ЧАТ ═══════ */
+.chat-layout{display:flex;width:100%;height:100%}
+.chat-sidebar{width:240px;background:#fff;border-right:1px solid #e5e5e5;padding:16px;flex-shrink:0}
+.chat-sidebar h3{font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.chat-item{padding:8px 10px;border-radius:8px;font-size:13px;color:#444;cursor:pointer;margin-bottom:2px}
+.chat-item.active{background:#f0eeff;color:#5B47E0;font-weight:500}
+.chat-main{flex:1;display:flex;flex-direction:column}
+.chat-header{padding:14px 20px;border-bottom:1px solid #e5e5e5;background:#fff;display:flex;align-items:center;gap:10px}
+.chat-header .step-badge{background:#f0eeff;color:#5B47E0;font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px}
+.chat-messages{flex:1;overflow-y:auto;padding:24px 20px;display:flex;flex-direction:column;gap:16px;background:#fafafa}
+
+.msg{display:flex;gap:12px;max-width:680px}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg-avatar{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.msg.bot .msg-avatar{background:#5B47E0;color:#fff}
+.msg.user .msg-avatar{background:#e0e0e0;color:#555}
+.msg-bubble{background:#fff;border:1px solid #e5e5e5;border-radius:14px;padding:12px 16px;font-size:14px;line-height:1.6;color:#333}
+.msg.user .msg-bubble{background:#5B47E0;border-color:#5B47E0;color:#fff}
+.msg-bubble b{font-weight:600}
+.msg-bubble ul{padding-left:18px;margin:6px 0}
+.msg-bubble li{margin-bottom:3px}
+
+/* Карточка мониторинга в чате */
+.monitor-card{margin-top:10px;background:#f8f7ff;border:1.5px solid #d4ccff;border-radius:12px;padding:14px 16px}
+.monitor-card-title{font-size:13px;font-weight:600;color:#5B47E0;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.monitor-card-desc{font-size:12px;color:#666;line-height:1.5;margin-bottom:12px}
+.monitor-card-btn{display:inline-block;background:#5B47E0;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s}
+.monitor-card-btn:hover{background:#4a38d4}
+.monitor-card-preview{display:flex;gap:8px;margin-bottom:12px}
+.mini-stat{flex:1;background:#fff;border:1px solid #e5e5e5;border-radius:8px;padding:8px 10px;text-align:center}
+.mini-stat .val{font-size:18px;font-weight:700;color:#5B47E0}
+.mini-stat .lbl{font-size:10px;color:#999;margin-top:2px}
+
+.chat-input-area{padding:16px 20px;background:#fff;border-top:1px solid #e5e5e5;display:flex;gap:10px}
+.chat-input{flex:1;border:1.5px solid #e5e5e5;border-radius:10px;padding:10px 14px;font-size:14px;outline:none;resize:none;font-family:inherit}
+.chat-send{background:#5B47E0;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer}
+
+/* ═══════ ЭКРАН 2: МОНИТОРИНГ ═══════ */
+.monitor-layout{display:flex;width:100%;height:100%}
+.monitor-sidebar{width:220px;background:#fff;border-right:1px solid #e5e5e5;padding:20px 16px;flex-shrink:0}
+.monitor-sidebar .logo{font-size:15px;font-weight:700;color:#5B47E0;margin-bottom:24px;display:flex;align-items:center;gap:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;color:#555;cursor:pointer;margin-bottom:2px}
+.nav-item.active{background:#f0eeff;color:#5B47E0;font-weight:500}
+.nav-item .icon{font-size:16px;width:20px;text-align:center}
+.nav-item .badge{background:#5B47E0;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;margin-left:auto}
+
+.monitor-main{flex:1;overflow-y:auto;padding:28px 32px;background:#f5f5f7}
+.monitor-main h1{font-size:22px;font-weight:700;color:#111;margin-bottom:4px}
+.monitor-main .subtitle{font-size:14px;color:#777;margin-bottom:24px}
+
+/* stats row */
+.stats-row{display:flex;gap:16px;margin-bottom:24px}
+.stat-card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:18px 20px;flex:1}
+.stat-card .s-val{font-size:28px;font-weight:700;color:#111}
+.stat-card .s-lbl{font-size:12px;color:#999;margin-top:3px}
+.stat-card .s-delta{font-size:12px;margin-top:6px;font-weight:500}
+.stat-card .s-delta.up{color:#16a34a}
+.stat-card .s-delta.down{color:#dc2626}
+
+/* filter bar */
+.filter-bar{display:flex;gap:10px;margin-bottom:16px;align-items:center}
+.filter-bar select,.filter-bar input{border:1.5px solid #e5e5e5;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;background:#fff;font-family:inherit;color:#333}
+.run-btn{margin-left:auto;background:#5B47E0;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+.run-btn:hover{background:#4a38d4}
+
+/* table */
+.kw-table{background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden}
+.kw-table table{width:100%;border-collapse:collapse;font-size:13px}
+.kw-table th{text-align:left;padding:11px 14px;background:#fafafa;border-bottom:1px solid #e5e5e5;font-weight:600;color:#777;font-size:12px}
+.kw-table td{padding:11px 14px;border-bottom:1px solid #f3f3f3;color:#333;vertical-align:middle}
+.kw-table tr:last-child td{border-bottom:none}
+.kw-table tr:hover td{background:#fafafa}
+
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600}
+.status-badge.found{background:#dcfce7;color:#166534}
+.status-badge.top{background:#dbeafe;color:#1e40af}
+.status-badge.notfound{background:#fee2e2;color:#991b1b}
+.status-badge.irrelevant{background:#fef3c7;color:#92400e}
+
+.pos-chip{display:inline-block;background:#f0eeff;color:#5B47E0;border-radius:6px;padding:2px 8px;font-weight:700;font-size:13px}
+.rec-text{color:#555;font-size:12px;line-height:1.4}
+.rec-text.good{color:#166534}
+.rec-text.warn{color:#b45309}
+.rec-text.bad{color:#991b1b}
+
+/* empty state */
+.empty{text-align:center;padding:60px 20px;color:#999}
+.empty .e-icon{font-size:48px;margin-bottom:16px}
+.empty h3{font-size:16px;font-weight:600;color:#555;margin-bottom:8px}
+.empty p{font-size:13px;line-height:1.6;max-width:320px;margin:0 auto 20px}
+
+/* upsell banner */
+.upsell{background:linear-gradient(135deg,#5B47E0,#8B5CF6);border-radius:12px;padding:20px 24px;color:#fff;margin-bottom:24px;display:flex;align-items:center;gap:16px}
+.upsell .u-text h3{font-size:16px;font-weight:700;margin-bottom:4px}
+.upsell .u-text p{font-size:13px;opacity:.85;line-height:1.5}
+.upsell-btn{background:#fff;color:#5B47E0;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+
+/* ЭКРАН 3: ПОСЛЕ ЗАПУСКА */
+.progress-bar-wrap{background:#f0eeff;border-radius:8px;height:8px;margin:12px 0}
+.progress-bar{background:#5B47E0;border-radius:8px;height:8px;width:60%;animation:progress 2s ease forwards}
+@keyframes progress{from{width:0}to{width:60%}}
+
+/* avito links */
+.avito-link{display:inline-flex;align-items:center;background:#fff7ed;color:#ea580c;border:1.5px solid #fed7aa;border-radius:7px;padding:4px 10px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;transition:.15s}
+.avito-link:hover{background:#ffedd5}
+.avito-link-warn{background:#fefce8;color:#b45309;border-color:#fde68a}
+.avito-link-warn:hover{background:#fef9c3}
+.avito-link-bad{background:#fef2f2;color:#dc2626;border-color:#fecaca}
+.avito-link-bad:hover{background:#fee2e2}
+
+/* tabs */
+.tabs{display:flex;gap:2px;background:#f0f0f0;border-radius:10px;padding:3px;margin-bottom:20px;width:fit-content}
+.tab{padding:7px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;color:#777;transition:.15s}
+.tab.active{background:#fff;color:#5B47E0;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nav-btn active" onclick="showScreen('chat')">💬 1. Момент в чате</button>
+  <button class="nav-btn" onclick="showScreen('monitor-empty')">📊 2. Мониторинг (первый заход)</button>
+  <button class="nav-btn" onclick="showScreen('monitor-full')">📈 3. Мониторинг (с данными)</button>
+  <span class="nav-label">← переключай экраны</span>
+</div>
+
+<!-- ═══ ЭКРАН 1: ЧАТ ═══ -->
+<div class="screen active" id="screen-chat">
+  <div class="chat-layout">
+    <div class="chat-sidebar">
+      <h3>Мои чаты</h3>
+      <div class="chat-item">Анализ конкурентов</div>
+      <div class="chat-item active">Объявление: ворота DoorHan</div>
+      <div class="chat-item">Газон — Краснодар</div>
+      <div class="chat-item">Ландшафтный дизайн</div>
+    </div>
+    <div class="chat-main">
+      <div class="chat-header">
+        <div>
+          <div style="font-size:14px;font-weight:600">Объявление: ворота DoorHan</div>
+          <div style="font-size:12px;color:#999">Работаем над объявлением</div>
+        </div>
+        <div class="step-badge">Шаг 7 из 10 — VAS-стратегия</div>
+      </div>
+      <div class="chat-messages">
+
+        <div class="msg user">
+          <div class="msg-avatar">В</div>
+          <div class="msg-bubble">Хорошо, текст объявления готов. Что дальше?</div>
+        </div>
+
+        <div class="msg bot">
+          <div class="msg-avatar">AI</div>
+          <div class="msg-bubble">
+            Текст отличный. Теперь шаг 7 — запускаем VAS-стратегию.<br><br>
+            Перед тем как тратить бюджет на продвижение, нужно знать <b>где вы сейчас стоите в выдаче</b> по вашим ключевым словам. Иначе непонятно — платить за «Поднять» или за «Выделить», и сколько.<br><br>
+            Я вижу что у вас <b>3 ключевых запроса</b> и <b>2 города</b> — это 6 позиций для отслеживания.
+
+            <div class="monitor-card">
+              <div class="monitor-card-title">📊 Проверьте позиции прямо сейчас</div>
+              <div class="monitor-card-preview">
+                <div class="mini-stat"><div class="val">6</div><div class="lbl">позиций</div></div>
+                <div class="mini-stat"><div class="val">2</div><div class="lbl">города</div></div>
+                <div class="mini-stat"><div class="val">~3 мин</div><div class="lbl">проверка</div></div>
+              </div>
+              <div class="monitor-card-desc">
+                Мониторинг покажет на каких позициях стоят ваши объявления по каждому ключу. Это поможет выбрать правильную VAS-стратегию и не тратить деньги вслепую.
+              </div>
+              <button class="monitor-card-btn" onclick="showScreen('monitor-empty')">Открыть мониторинг →</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="msg bot">
+          <div class="msg-avatar">AI</div>
+          <div class="msg-bubble" style="background:#fffbeb;border-color:#fde68a;color:#78350f">
+            💡 <b>Совет:</b> если вы уже в топ-3 — достаточно «Выделить». Если на 10–30 месте — нужен «Поднять» + оптимизация заголовка. Мониторинг покажет точную картину.
+          </div>
+        </div>
+
+      </div>
+      <div class="chat-input-area">
+        <textarea class="chat-input" rows="1" placeholder="Напишите сообщение..."></textarea>
+        <button class="chat-send">→</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ЭКРАН 2: МОНИТОРИНГ ПУСТОЙ ═══ -->
+<div class="screen" id="screen-monitor-empty">
+  <div class="monitor-layout">
+    <div class="monitor-sidebar">
+      <div class="logo">🔍 AI Авитолог</div>
+      <div class="nav-item">💬 <span>Чаты</span></div>
+      <div class="nav-item">📁 <span>Документы</span></div>
+      <div class="nav-item">📊 <span>Статистика</span></div>
+      <div class="nav-item active">📍 <span>Мониторинг</span> <span class="badge">NEW</span></div>
+      <div class="nav-item" style="margin-top:auto">⚙️ <span>Настройки</span></div>
+    </div>
+    <div class="monitor-main">
+      <h1>Мониторинг позиций</h1>
+      <div class="subtitle">Отслеживайте где показываются ваши объявления по ключевым запросам</div>
+
+      <div class="upsell">
+        <div style="font-size:36px">📍</div>
+        <div class="u-text">
+          <h3>Запустите первую проверку</h3>
+          <p>Добавьте ключевые слова и города — мониторинг покажет позиции ваших объявлений, количество конкурентов и даст рекомендации по продвижению.</p>
+        </div>
+        <button class="upsell-btn" onclick="showSetup()">Настроить →</button>
+      </div>
+
+      <div id="setup-block" style="display:none;background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:24px;margin-bottom:24px">
+        <div style="font-size:15px;font-weight:600;margin-bottom:16px">Добавить ключевые слова</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div>
+            <div style="font-size:12px;color:#777;margin-bottom:6px;font-weight:500">Аккаунт на Авито</div>
+            <input style="width:100%;border:1.5px solid #e5e5e5;border-radius:8px;padding:9px 12px;font-size:13px;outline:none" placeholder="DoorHan официальный дилер" value="Международный концерн DoorHan">
+          </div>
+          <div>
+            <div style="font-size:12px;color:#777;margin-bottom:6px;font-weight:500">Город / регион</div>
+            <input style="width:100%;border:1.5px solid #e5e5e5;border-radius:8px;padding:9px 12px;font-size:13px;outline:none" placeholder="Область, Город" value="Амурская область, Благовещенск">
+          </div>
+        </div>
+        <div style="margin-bottom:16px">
+          <div style="font-size:12px;color:#777;margin-bottom:6px;font-weight:500">Ключевые слова (каждое с новой строки)</div>
+          <textarea style="width:100%;border:1.5px solid #e5e5e5;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;resize:none;height:80px;font-family:inherit">Гаражные ворота
+Секционные ворота
+Откатные ворота</textarea>
+        </div>
+        <div style="font-size:11px;color:#999;margin-bottom:14px">💡 Указывайте регион и город: «Амурская область, Благовещенск» — это важно для точного результата</div>
+        <button class="run-btn" onclick="showScreen('monitor-full')" style="margin-left:0">▶ Запустить проверку</button>
+      </div>
+
+      <div class="empty">
+        <div class="e-icon">📍</div>
+        <h3>Нет данных для отображения</h3>
+        <p>Добавьте ключевые слова и города выше — первая проверка займёт около 3 минут</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ЭКРАН 3: МОНИТОРИНГ С ДАННЫМИ ═══ -->
+<div class="screen" id="screen-monitor-full">
+  <div class="monitor-layout">
+    <div class="monitor-sidebar">
+      <div class="logo">🔍 AI Авитолог</div>
+      <div class="nav-item">💬 <span>Чаты</span></div>
+      <div class="nav-item">📁 <span>Документы</span></div>
+      <div class="nav-item">📊 <span>Статистика</span></div>
+      <div class="nav-item active">📍 <span>Мониторинг</span></div>
+      <div class="nav-item" style="margin-top:auto">⚙️ <span>Настройки</span></div>
+    </div>
+    <div class="monitor-main">
+      <h1>Мониторинг позиций</h1>
+      <div class="subtitle">Последняя проверка: сегодня в 14:32 · Следующая: завтра в 09:00</div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="s-val">12</div>
+          <div class="s-lbl">позиций проверено</div>
+          <div class="s-delta up">↑ +3 vs прошлая неделя</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-val" style="color:#16a34a">5</div>
+          <div class="s-lbl">в топ-10</div>
+          <div class="s-delta up">↑ +1 vs прошлая неделя</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-val" style="color:#dc2626">4</div>
+          <div class="s-lbl">не найдено</div>
+          <div class="s-delta">нужно создать объявления</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-val" style="color:#b45309">3</div>
+          <div class="s-lbl">требуют внимания</div>
+          <div class="s-delta down">↓ позиции упали</div>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <select>
+          <option>Все аккаунты</option>
+          <option selected>DoorHan — Благовещенск</option>
+        </select>
+        <select>
+          <option>Все статусы</option>
+          <option>Топ-3</option>
+          <option>Найдено</option>
+          <option>Не найдено</option>
+        </select>
+        <input placeholder="Поиск по ключу..." style="width:200px">
+        <button class="run-btn" style="margin-left:0">▶ Запустить проверку</button>
+        <button onclick="downloadCSV()" style="margin-left:auto;background:#fff;color:#555;border:1.5px solid #e5e5e5;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px">⬇ Скачать Excel</button>
+      </div>
+
+      <div class="kw-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Ключевое слово</th>
+              <th>Город</th>
+              <th>Позиция</th>
+              <th>Конкурентов</th>
+              <th>Статус</th>
+              <th>Рекомендация</th>
+              <th>Объявление</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Гаражные ворота</b></td>
+              <td>Благовещенск</td>
+              <td><span class="pos-chip">2</span></td>
+              <td>4 940</td>
+              <td><span class="status-badge top">🏆 Топ-3</span></td>
+              <td class="rec-text good">Удерживать ставку</td>
+              <td><a href="https://www.avito.ru/blagoveschensk/vorota_1234567" target="_blank" class="avito-link">→ Авито</a></td>
+            </tr>
+            <tr>
+              <td><b>Секционные ворота</b></td>
+              <td>Благовещенск</td>
+              <td><span class="pos-chip">7</span></td>
+              <td>2 100</td>
+              <td><span class="status-badge found">✓ Найдено</span></td>
+              <td class="rec-text warn">Усилить ставку для топ-3</td>
+              <td><a href="https://www.avito.ru/blagoveschensk/vorota_2345678" target="_blank" class="avito-link">→ Авито</a></td>
+            </tr>
+            <tr>
+              <td><b>Откатные ворота</b></td>
+              <td>Благовещенск</td>
+              <td><span class="pos-chip">18</span></td>
+              <td>890</td>
+              <td><span class="status-badge found">✓ Найдено</span></td>
+              <td class="rec-text warn">Поднять ставку</td>
+              <td><a href="https://www.avito.ru/blagoveschensk/vorota_3456789" target="_blank" class="avito-link avito-link-warn">→ Авито ↑</a></td>
+            </tr>
+            <tr>
+              <td><b>Гаражные ворота</b></td>
+              <td>Омск</td>
+              <td><span class="pos-chip">10</span></td>
+              <td>7 698</td>
+              <td><span class="status-badge found">✓ Найдено</span></td>
+              <td class="rec-text warn">Усилить ставку для топ-3</td>
+              <td><a href="https://www.avito.ru/omsk/vorota_4567890" target="_blank" class="avito-link">→ Авито</a></td>
+            </tr>
+            <tr>
+              <td><b>Секционные ворота</b></td>
+              <td>Омск</td>
+              <td><span class="pos-chip">34</span></td>
+              <td>3 200</td>
+              <td><span class="status-badge irrelevant">⚠ Нерелевантно</span></td>
+              <td class="rec-text bad">Нужно новое объявление под ключ</td>
+              <td><a href="https://www.avito.ru/omsk/vorota_5678901" target="_blank" class="avito-link avito-link-bad">→ Авито</a></td>
+            </tr>
+            <tr>
+              <td><b>Откатные ворота</b></td>
+              <td>Омск</td>
+              <td style="color:#ccc">—</td>
+              <td>1 560</td>
+              <td><span class="status-badge notfound">✗ Не найдено</span></td>
+              <td class="rec-text bad">Создать объявление</td>
+              <td><a href="https://www.avito.ru/profile/ads" target="_blank" class="avito-link avito-link-bad">+ Создать</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="font-size:12px;color:#aaa;margin-top:8px;padding:0 2px">
+        💡 Нажмите «→ Авито» — объявление откроется в новой вкладке, вы уже залогинены и сразу поднимаете ставку
+      </div>
+
+      <!-- AI-подсказка -->
+      <div style="background:#f8f7ff;border:1.5px solid #d4ccff;border-radius:12px;padding:18px 20px;margin-top:20px;display:flex;gap:14px;align-items:flex-start">
+        <div style="font-size:28px">🤖</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#5B47E0;margin-bottom:6px">AI-анализ результатов</div>
+          <div style="font-size:13px;color:#444;line-height:1.6">
+            По <b>Благовещенску</b> ситуация хорошая — «Гаражные ворота» в топ-2, удерживайте ставку. «Откатные ворота» на 18-м месте — рекомендую «Поднять» на 3–5 дней, бюджет ~500–800 ₽.<br><br>
+            По <b>Омску</b> критично: «Откатных ворот» нет вообще — создайте отдельное объявление. «Секционные» показывают нерелевантные объявления — нужен новый заголовок под этот запрос.<br><br>
+            <b>→ Вернуться в чат и доработать стратегию для Омска</b>
+          </div>
+          <button onclick="showScreen('chat')" style="margin-top:10px;background:#5B47E0;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer">Обсудить с AI авитологом →</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  const idx = ['chat','monitor-empty','monitor-full'].indexOf(name);
+  document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+}
+function showSetup() {
+  document.getElementById('setup-block').style.display = 'block';
+}
+function downloadCSV() {
+  const rows = [
+    ['Ключевое слово','Город','Позиция','Конкурентов','Статус','Рекомендация','Ссылка на объявление'],
+    ['Гаражные ворота','Благовещенск','2','4940','Топ-3','Удерживать ставку','https://www.avito.ru/blagoveschensk/vorota_1234567'],
+    ['Секционные ворота','Благовещенск','7','2100','Найдено','Усилить ставку для топ-3','https://www.avito.ru/blagoveschensk/vorota_2345678'],
+    ['Откатные ворота','Благовещенск','18','890','Найдено','Поднять ставку','https://www.avito.ru/blagoveschensk/vorota_3456789'],
+    ['Гаражные ворота','Омск','10','7698','Найдено','Усилить ставку для топ-3','https://www.avito.ru/omsk/vorota_4567890'],
+    ['Секционные ворота','Омск','34','3200','Нерелевантно','Нужно новое объявление','https://www.avito.ru/omsk/vorota_5678901'],
+    ['Откатные ворота','Омск','—','1560','Не найдено','Создать объявление','https://www.avito.ru/profile/ads'],
+  ];
+  const csv = rows.map(r => r.map(c => '"'+c+'"').join(',')).join('\n');
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'мониторинг_позиций_16.05.2026.csv';
+  a.click();
+}
+</script>
+</body>
+</html>
