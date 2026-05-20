@@ -3,16 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AI Авитолог PRO — Мониторинг</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>AI Авитолог PRO — Инструменты</title>
 <style>
+:root{
+  --bg:#0D0D1A;
+  --bg-card:#1A1828;
+  --bg-card2:#221F33;
+  --purple:#7C3AED;
+  --purple-light:#9F67FF;
+  --purple-dark:#5B21B6;
+  --purple-dim:rgba(124,58,237,0.15);
+  --white:#FFFFFF;
+  --gray:#9CA3AF;
+  --border:rgba(255,255,255,0.08);
+  --gold:#F59E0B;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:#f5f5f7;color:#111}
+body{font-family:'Manrope',-apple-system,sans-serif;background:var(--bg);color:var(--white)}
 
 /* NAV */
-.nav{display:flex;gap:8px;padding:16px 24px;background:#fff;border-bottom:1px solid #e5e5e5;align-items:center}
-.nav-btn{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:#f0f0f0;color:#555;transition:.15s}
-.nav-btn.active{background:#5B47E0;color:#fff}
-.nav-label{font-size:12px;color:#999;margin-left:8px}
+.nav{display:flex;gap:6px;padding:12px 20px;background:#12101F;border-bottom:1px solid var(--border);align-items:center;flex-wrap:wrap}
+.nav-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:12px;font-weight:600;background:transparent;color:var(--gray);transition:.15s;font-family:'Manrope',sans-serif}
+.nav-btn:hover{background:var(--purple-dim);color:var(--white);border-color:var(--purple)}
+.nav-btn.active{background:linear-gradient(90deg,var(--purple),var(--purple-light));color:#fff;border-color:transparent}
+.nav-label{font-size:11px;color:rgba(156,163,175,0.5);margin-left:8px}
 
 /* SCREENS */
 .screen{display:none;height:calc(100vh - 57px)}
@@ -128,6 +143,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 .avito-link-bad{background:#fef2f2;color:#dc2626;border-color:#fecaca}
 .avito-link-bad:hover{background:#fee2e2}
 
+/* photo tool */
+.photo-var{height:100px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:32px;cursor:pointer;border:2px solid transparent;transition:.15s}
+.photo-var:hover{border-color:#5B47E0;transform:scale(1.02)}
+.ref-photo{min-width:88px;height:88px;flex-shrink:0;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:22px;cursor:pointer;position:relative;overflow:hidden;
+  border:2px solid transparent;transition:.15s}
+.ref-photo:hover{border-color:#5B47E0;transform:scale(1.04)}
+.ref-badge{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);
+  color:#fff;font-size:9px;text-align:center;padding:3px 4px;line-height:1.3}
+
 /* tabs */
 .tabs{display:flex;gap:2px;background:#f0f0f0;border-radius:10px;padding:3px;margin-bottom:20px;width:fit-content}
 .tab{padding:7px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;color:#777;transition:.15s}
@@ -138,14 +164,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 
 <!-- NAV -->
 <div class="nav">
-  <button class="nav-btn active" onclick="showScreen('chat')">💬 1. Момент в чате</button>
-  <button class="nav-btn" onclick="showScreen('monitor-empty')">📊 2. Мониторинг (первый заход)</button>
-  <button class="nav-btn" onclick="showScreen('monitor-full')">📈 3. Мониторинг (с данными)</button>
+  <button class="nav-btn active" onclick="showScreen('chat-monitor')">💬 1. Чат → Мониторинг</button>
+  <button class="nav-btn" onclick="showScreen('monitor-full')">📈 2. Мониторинг (с данными)</button>
+  <button class="nav-btn" onclick="showScreen('chat-parser')">🔍 3. Чат → Парсер</button>
+  <button class="nav-btn" onclick="showScreen('parser-progress')">⏳ 4. Парсер (прогон)</button>
+  <button class="nav-btn" onclick="showScreen('parser-result')">✅ 5. Парсер (результат)</button>
+  <button class="nav-btn" onclick="showScreen('chat-photo')">🖼 6. Чат → Фото</button>
+  <button class="nav-btn" onclick="showScreen('photo-tool')">✨ 7. Инструмент фото</button>
   <span class="nav-label">← переключай экраны</span>
 </div>
 
-<!-- ═══ ЭКРАН 1: ЧАТ ═══ -->
-<div class="screen active" id="screen-chat">
+<!-- ═══ ЭКРАН 1: ЧАТ → МОНИТОРИНГ ═══ -->
+<div class="screen active" id="screen-chat-monitor">
   <div class="chat-layout">
     <div class="chat-sidebar">
       <h3>Мои чаты</h3>
@@ -414,7 +444,7 @@ function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
-  const idx = ['chat','monitor-empty','monitor-full'].indexOf(name);
+  const idx = ['chat-monitor','monitor-full','chat-parser','parser-progress','parser-result','chat-photo','photo-tool'].indexOf(name);
   document.querySelectorAll('.nav-btn')[idx].classList.add('active');
 }
 function showSetup() {
@@ -436,6 +466,558 @@ function downloadCSV() {
   a.href = URL.createObjectURL(blob);
   a.download = 'мониторинг_позиций_16.05.2026.csv';
   a.click();
+}
+</script>
+
+<!-- ═══ ЭКРАН 3: ЧАТ → ПАРСЕР ═══ -->
+<div class="screen" id="screen-chat-parser">
+  <div class="chat-layout">
+    <div class="chat-sidebar">
+      <h3>Мои чаты</h3>
+      <div class="chat-item active">Ворота DoorHan — Старт</div>
+      <div class="chat-item">Рулонный газон — Краснодар</div>
+      <div class="chat-item">Ландшафтный дизайн</div>
+    </div>
+    <div class="chat-main">
+      <div class="chat-header">
+        <div>
+          <div style="font-size:14px;font-weight:600">Ворота DoorHan — Старт</div>
+          <div style="font-size:12px;color:#999">Новый проект</div>
+        </div>
+        <div class="step-badge">Шаг 1 из 10 — Анализ конкурентов</div>
+      </div>
+      <div class="chat-messages">
+
+        <div class="msg user">
+          <div class="msg-avatar">В</div>
+          <div class="msg-bubble">Хочу продвигать гаражные ворота DoorHan в Благовещенске</div>
+        </div>
+
+        <div class="msg bot">
+          <div class="msg-avatar">AI</div>
+          <div class="msg-bubble">
+            Отлично, начинаем с Шага 1 — анализ конкурентов. Это фундамент всей стратегии:<br><br>
+            Нам нужно знать <b>кто уже продаёт ворота на Авито</b>, какие заголовки и фото работают,
+            кто доминирует по просмотрам, какая цена рынка. Без этого — слепое продвижение.<br><br>
+            <b>Что нужно сделать:</b><br>
+            1. Открой Авито → найди свою нишу → настрой фильтры<br>
+            2. Скопируй ссылку из адресной строки<br>
+            3. Запусти анализ ниже — я получу все данные и разберу их с тобой
+
+            <div class="monitor-card">
+              <div class="monitor-card-title">🔍 Анализ конкурентов</div>
+              <div class="monitor-card-preview">
+                <div class="mini-stat"><div class="val">~150</div><div class="lbl">объявлений</div></div>
+                <div class="mini-stat"><div class="val">фото</div><div class="lbl">конкурентов</div></div>
+                <div class="mini-stat"><div class="val">~10 мин</div><div class="lbl">сбор данных</div></div>
+              </div>
+              <div class="monitor-card-desc">
+                Парсер соберёт позиции, заголовки, фото, просмотры и данные аккаунтов.
+                Я проанализирую кто доминирует, какие связки работают и как войти в нишу.
+              </div>
+              <button class="monitor-card-btn" onclick="showScreen('parser-progress')">Запустить анализ →</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="chat-input-area">
+        <textarea class="chat-input" rows="1" placeholder="Напишите сообщение..."></textarea>
+        <button class="chat-send">→</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ЭКРАН 4: ПАРСЕР — ПРОГОН ═══ -->
+<div class="screen" id="screen-parser-progress">
+  <div class="monitor-layout">
+    <div class="monitor-sidebar">
+      <div class="logo">🔍 AI Авитолог</div>
+      <div class="nav-item">💬 <span>Чаты</span></div>
+      <div class="nav-item">📍 <span>Мониторинг</span></div>
+      <div class="nav-item active">🔎 <span>Анализ ниши</span></div>
+      <div class="nav-item">⚙️ <span>Настройки</span></div>
+    </div>
+    <div class="monitor-main">
+      <h1>Анализ конкурентов</h1>
+      <div class="subtitle">Сбор данных по вашей нише</div>
+
+      <div class="card" style="margin-bottom:20px">
+        <h2>Параметры прогона</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div>
+            <div style="font-size:12px;color:#777;margin-bottom:6px;font-weight:500">Ссылка Авито</div>
+            <div style="font-size:13px;color:#333;background:#f5f5f7;border-radius:8px;padding:8px 12px;word-break:break-all">
+              avito.ru/rossiya/remont_i_stroitelstvo/vorota_zabory...
+            </div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:#777;margin-bottom:6px;font-weight:500">Режим</div>
+            <div style="font-size:13px;color:#333;background:#f5f5f7;border-radius:8px;padding:8px 12px">
+              Полный • 3 страницы • ~150 объявлений
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Прогресс -->
+      <div class="card" style="margin-bottom:20px">
+        <h2>Прогресс <span style="color:#22c55e;font-size:12px">● идёт</span></h2>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
+          <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:22px;font-weight:700;color:#16a34a">✓</div>
+            <div style="font-size:13px;font-weight:600;margin-top:4px">Выдача</div>
+            <div style="font-size:12px;color:#555">150 объявлений</div>
+          </div>
+          <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:22px;font-weight:700;color:#2563eb">87<span style="font-size:14px">/150</span></div>
+            <div style="font-size:13px;font-weight:600;margin-top:4px">Детали</div>
+            <div style="font-size:12px;color:#555">фото, просмотры, текст</div>
+          </div>
+          <div style="background:#f5f5f7;border:1px solid #e5e5e5;border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:22px;font-weight:700;color:#9ca3af">—</div>
+            <div style="font-size:13px;font-weight:600;margin-top:4px">Аккаунты</div>
+            <div style="font-size:12px;color:#555">рейтинг, отзывы</div>
+          </div>
+        </div>
+
+        <div style="background:#f0f0f0;border-radius:8px;height:10px;overflow:hidden;margin-bottom:8px">
+          <div style="background:linear-gradient(90deg,#5B47E0,#8B5CF6);height:10px;width:58%;border-radius:8px;transition:.3s"></div>
+        </div>
+        <div style="font-size:12px;color:#777">87 из 150 • осталось ~7 мин</div>
+
+        <div style="margin-top:16px;background:#0f172a;border-radius:8px;padding:12px;font-size:11px;color:#94a3b8;max-height:120px;overflow:hidden">
+          [87/150] Секционные ворота DoorHan под заказ...<br>
+          &nbsp;&nbsp;✓ просм: 12/340 | фото: 8<br>
+          [88/150] Гаражные ворота с установкой...<br>
+          &nbsp;&nbsp;✓ просм: 3/87 | фото: 5<br>
+          [89/150] Откатные ворота под ключ...<br>
+          &nbsp;&nbsp;✓ просм: 0/145 | фото: 12<br>
+          <span style="color:#94a3b8">...</span>
+        </div>
+
+        <button class="btn btn-red" style="margin-top:14px;font-size:13px">⏹ Остановить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ЭКРАН 5: ПАРСЕР — РЕЗУЛЬТАТ ═══ -->
+<div class="screen" id="screen-parser-result">
+  <div class="monitor-layout">
+    <div class="monitor-sidebar">
+      <div class="logo">🔍 AI Авитолог</div>
+      <div class="nav-item">💬 <span>Чаты</span></div>
+      <div class="nav-item">📍 <span>Мониторинг</span></div>
+      <div class="nav-item active">🔎 <span>Анализ ниши</span></div>
+      <div class="nav-item">⚙️ <span>Настройки</span></div>
+    </div>
+    <div class="monitor-main">
+      <h1>Анализ конкурентов</h1>
+      <div class="subtitle">Последний прогон: сегодня 15:47 • Гаражные ворота • вся РФ</div>
+
+      <!-- Итоги -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="s-val">150</div>
+          <div class="s-lbl">объявлений</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-val">19</div>
+          <div class="s-lbl">конкурентов</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-val" style="color:#dc2626">78%</div>
+          <div class="s-lbl">с продвижением</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-val" style="color:#16a34a">×5</div>
+          <div class="s-lbl">VAS даёт просмотров</div>
+        </div>
+      </div>
+
+      <!-- Результат + кнопки -->
+      <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px">
+        <div style="font-size:32px">✅</div>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:700;margin-bottom:8px">Данные собраны — 150 объявлений, 19 аккаунтов</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <a href="#" class="btn btn-green" style="font-size:13px">📊 Открыть таблицу →</a>
+            <button onclick="showCopied()" class="btn btn-blue" style="font-size:13px">🤖 Отправить в чат с AI авитологом</button>
+          </div>
+          <div id="copied-msg" style="display:none;font-size:12px;color:#16a34a;margin-top:8px">✓ Данные переданы! AI авитолог уже анализирует нишу...</div>
+        </div>
+      </div>
+
+      <!-- AI анализ (появляется после отправки в чат) -->
+      <div style="background:#f8f7ff;border:1.5px solid #d4ccff;border-radius:12px;padding:20px;margin-bottom:20px">
+        <div style="font-size:14px;font-weight:700;color:#5B47E0;margin-bottom:12px">🤖 AI авитолог анализирует нишу</div>
+        <div style="font-size:13px;color:#444;line-height:1.7">
+          <b>Насыщенность:</b> умеренная — 19 конкурентов, топ-3 занимают 68% просмотров.<br><br>
+          <b>Топ-конкурент</b> — «DoorHan официальный дилер»: 45 объявлений, рейтинг 4.9,
+          407 отзывов. Слабость: все заголовки одинаковые, нет геолокации в тексте.<br><br>
+          <b>Формула заголовка</b> которая даёт больше всего просмотров:<br>
+          <span style="background:#f0eeff;color:#5B47E0;padding:3px 8px;border-radius:6px;font-weight:600">
+            [Тип ворот] + [DoorHan] + [Город/район] + «под ключ»
+          </span><br><br>
+          <b>VAS:</b> обязателен — объявления с продвижением получают в ×5 больше просмотров.
+          «Поднять» на 3-5 дней = оптимальный старт.<br><br>
+          <b>Цена:</b> медиана 15 000₽. Твой порог входа — 12 000-14 000₽ для конкуренции.<br><br>
+          <b>→ Переходим к Шагу 2?</b> Определим сегменты аудитории на основе этих данных.
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px">
+          <button onclick="showScreen('chat-parser')" class="btn btn-blue" style="font-size:13px">
+            Продолжить в чате → Шаг 2
+          </button>
+          <a href="#" class="btn btn-gray" style="font-size:13px">📊 Смотреть таблицу</a>
+        </div>
+      </div>
+
+      <!-- Топ фото конкурентов -->
+      <div class="card">
+        <h2>Топ фото конкурентов <span style="font-size:11px;color:#999;font-weight:400">(используются на Шаге 6 для ТЗ фотографу)</span></h2>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          ${[1,2,3,4,5].map(i => `
+          <div style="width:100px;height:80px;background:linear-gradient(135deg,#e0e7ff,#c7d2fe);
+               border-radius:8px;display:flex;align-items:center;justify-content:center;
+               font-size:24px;cursor:pointer;border:2px solid transparent"
+               onmouseover="this.style.borderColor='#5B47E0'" onmouseout="this.style.borderColor='transparent'">
+            🚪
+          </div>`).join('')}
+          <div style="width:100px;height:80px;background:#f5f5f7;border-radius:8px;border:2px dashed #e5e5e5;
+               display:flex;align-items:center;justify-content:center;font-size:12px;color:#999;text-align:center;padding:8px">
+            +145 фото
+          </div>
+        </div>
+        <div style="font-size:12px;color:#9ca3af;margin-top:10px">
+          💡 На Шаге 6 AI авитолог проанализирует эти фото и напишет ТЗ для твоего фотографа
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ЭКРАН 6: ЧАТ → ФОТО ═══ -->
+<div class="screen" id="screen-chat-photo">
+  <div class="chat-layout">
+    <div class="chat-sidebar">
+      <h3>Мои чаты</h3>
+      <div class="chat-item active">Ворота DoorHan — Старт</div>
+      <div class="chat-item">Рулонный газон — Краснодар</div>
+    </div>
+    <div class="chat-main">
+      <div class="chat-header">
+        <div>
+          <div style="font-size:14px;font-weight:600">Ворота DoorHan — Старт</div>
+        </div>
+        <div class="step-badge">Шаг 6 из 10 — Фото и визуал</div>
+      </div>
+      <div class="chat-messages">
+
+        <div class="msg bot">
+          <div class="msg-avatar">AI</div>
+          <div class="msg-bubble">
+            Текст объявления готов. Переходим к Шагу 6 — <b>визуал</b>.<br><br>
+
+            Я проанализировал 150 фото конкурентов из вашей ниши. Вот картина:<br><br>
+
+            ✅ <b>Что работает у топов:</b> ворота на объекте (не рендер), монтажники в кадре, светлый день<br>
+            🔴 <b>Слабость конкурентов:</b> у 89% — нет текста на фото, нет цены, нет отличий. Все одинаковые.<br><br>
+
+            <b>Это ваше окно:</b> фото с текстом + ваш фирменный стиль = сразу выделяетесь в выдаче.<br><br>
+
+            Прежде чем генерировать — <b>есть ли у вас фирменный стиль?</b>
+
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+              <button onclick="showScreen('photo-tool')" style="background:#5B47E0;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;text-align:left">
+                🎨 Да — указать цвета и стиль бренда
+              </button>
+              <button onclick="showScreen('photo-tool')" style="background:#f0eeff;color:#5B47E0;border:1.5px solid #d4ccff;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;text-align:left">
+                ✨ Нет — AI сделает лучше конкурентов сам
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="chat-input-area">
+        <textarea class="chat-input" rows="1" placeholder="Напишите сообщение..."></textarea>
+        <button class="chat-send">→</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ЭКРАН 7: ИНСТРУМЕНТ ФОТО ═══ -->
+<div class="screen" id="screen-photo-tool">
+  <div class="monitor-layout">
+    <div class="monitor-sidebar">
+      <div class="logo">🔍 AI Авитолог</div>
+      <div class="nav-item">💬 <span>Чаты</span></div>
+      <div class="nav-item">📍 <span>Мониторинг</span></div>
+      <div class="nav-item">🔎 <span>Анализ ниши</span></div>
+      <div class="nav-item active">🖼 <span>Фото</span> <span class="badge">NEW</span></div>
+      <div class="nav-item">⚙️ <span>Настройки</span></div>
+    </div>
+    <div class="monitor-main">
+      <h1>Визуал для объявления</h1>
+      <div class="subtitle">Шаг 6 · Ворота DoorHan — Старт</div>
+
+      <!-- Анализ конкурентов -->
+      <div style="background:#fff8f0;border:1.5px solid #fed7aa;border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;gap:14px">
+        <div style="font-size:22px">🔍</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px">AI проанализировал фото конкурентов</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+            <div style="background:#fff;border-radius:8px;padding:8px 10px;border:1px solid #fde68a">
+              <div style="color:#92400e;font-weight:600;margin-bottom:3px">❌ У 89% конкурентов</div>
+              <div style="color:#78350f">Нет текста на фото · Нет цены · Фото одинаковые</div>
+            </div>
+            <div style="background:#fff;border-radius:8px;padding:8px 10px;border:1px solid #86efac">
+              <div style="color:#166534;font-weight:600;margin-bottom:3px">✓ Ваше преимущество</div>
+              <div style="color:#14532d">Текст + цена + ваш стиль = выделяетесь сразу</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Бренд клиента -->
+      <div style="background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:12px;padding:14px 18px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:13px;font-weight:700;color:#5B47E0">🎨 Стиль бренда</div>
+          <div style="display:flex;gap:6px">
+            <button style="background:#5B47E0;color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer">Задан</button>
+            <button style="background:#f0eeff;color:#5B47E0;border:1px solid #d4ccff;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer">Изменить</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;gap:6px">
+            <div style="width:24px;height:24px;border-radius:50%;background:#1a365d;border:2px solid #fff;box-shadow:0 0 0 1px #e5e5e5" title="Тёмно-синий"></div>
+            <div style="width:24px;height:24px;border-radius:50%;background:#f6ad55;border:2px solid #fff;box-shadow:0 0 0 1px #e5e5e5" title="Оранжевый"></div>
+            <div style="width:24px;height:24px;border-radius:50%;background:#ffffff;border:2px solid #e5e5e5;box-shadow:0 0 0 1px #e5e5e5" title="Белый"></div>
+          </div>
+          <div style="font-size:12px;color:#666">DoorHan · тёмно-синий + оранжевый · строгий профессиональный стиль</div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:#888;background:#f0eeff;border-radius:6px;padding:6px 10px">
+          💡 AI учтёт эти цвета и стиль при генерации — фото будет узнаваемо вашим
+        </div>
+      </div>
+
+      <!-- Табы -->
+      <div class="tabs" style="margin-bottom:20px">
+        <div class="tab active" onclick="switchPhotoTab(this,'gen')">✨ Генерация</div>
+        <div class="tab" onclick="switchPhotoTab(this,'banner')">🎨 Планшка</div>
+        <div class="tab" onclick="switchPhotoTab(this,'enhance')">⬆️ Улучшение</div>
+      </div>
+
+      <!-- Генерация -->
+      <div id="tab-gen">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <!-- Левая: промпт -->
+          <div class="card">
+            <h2>Промпт</h2>
+            <div style="font-size:12px;color:#777;margin-bottom:8px">
+              AI составил промпт на основе анализа конкурентов:
+            </div>
+            <textarea style="width:100%;height:120px;border:1.5px solid #e5e5e5;border-radius:8px;padding:10px;font-size:13px;resize:none;font-family:inherit;line-height:1.5">Профессиональная установка гаражных ворот DoorHan. Монтажники в спецодежде работают на частном доме, светлый день, аккуратный двор. Современные секционные ворота, качественный результат. Фото как в рекламе.</textarea>
+            <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+              <select style="border:1.5px solid #e5e5e5;border-radius:8px;padding:8px 10px;font-size:13px;flex:1">
+                <option>GPT Image (в стеке)</option>
+                <option>Bannana API</option>
+              </select>
+              <button onclick="showGenResult()" class="btn btn-blue" style="font-size:13px">
+                ✨ Сгенерировать
+              </button>
+            </div>
+            <div style="font-size:11px;color:#9ca3af;margin-top:8px">💳 Стоимость: 29 ₽</div>
+          </div>
+
+          <!-- Правая: результат -->
+          <div class="card" id="gen-result-empty">
+            <h2>Результат</h2>
+            <div style="height:180px;background:#f5f5f7;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#9ca3af">
+              <div style="font-size:32px">🖼</div>
+              <div style="font-size:13px">Нажми «Сгенерировать»</div>
+            </div>
+          </div>
+
+          <div class="card" id="gen-result-done" style="display:none">
+            <h2>Результат <span style="color:#22c55e;font-size:12px">✓ 4 варианта</span></h2>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+              <div class="photo-var" style="background:linear-gradient(135deg,#1e3a5f,#4a7fa8)">🚪</div>
+              <div class="photo-var" style="background:linear-gradient(135deg,#2d4a6b,#5a8fb8)">🚪</div>
+              <div class="photo-var" style="background:linear-gradient(135deg,#3a5a7a,#6a9fc8)">🚪</div>
+              <div class="photo-var" style="background:linear-gradient(135deg,#1a2f4e,#3a6f98)">🚪</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-green" style="font-size:12px;flex:1">⬇ Скачать</button>
+              <button onclick="showScreen('chat-photo')" class="btn btn-blue" style="font-size:12px;flex:1">→ В объявление</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Фото конкурентов как референс -->
+        <div class="card" style="margin-top:20px">
+          <h2>Фото конкурентов — референс</h2>
+          <div style="font-size:12px;color:#777;margin-bottom:10px">Из анализа ниши · топ-10 объявлений по просмотрам</div>
+          <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px">
+            <div class="ref-photo" style="background:linear-gradient(135deg,#1e3a5f,#4a7fa8)">🚪<div class="ref-badge">#1 · 948 просм</div></div>
+            <div class="ref-photo" style="background:linear-gradient(135deg,#2d5a3d,#4a8f5a)">🚪<div class="ref-badge">#2 · 891 просм</div></div>
+            <div class="ref-photo" style="background:linear-gradient(135deg,#5a2d2d,#8f4a4a)">🚪<div class="ref-badge">#3 · 437 просм</div></div>
+            <div class="ref-photo" style="background:linear-gradient(135deg,#3a3a1e,#7a7a3d)">🚪<div class="ref-badge">#4 · 356 просм</div></div>
+            <div class="ref-photo" style="background:linear-gradient(135deg,#2d1e5a,#5a3d8f)">🚪<div class="ref-badge">#5 · 293 просм</div></div>
+            <div class="ref-photo" style="background:linear-gradient(135deg,#1e4a4a,#3d8f8f)">🚪<div class="ref-badge">#6 · 217 просм</div></div>
+            <div class="ref-photo" style="background:linear-gradient(135deg,#4a3d1e,#8f7a3d)">🚪<div class="ref-badge">#7 · 197 просм</div></div>
+            <div style="min-width:88px;height:88px;flex-shrink:0;background:#f5f5f7;border-radius:10px;border:2px dashed #e5e5e5;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;color:#9ca3af;font-size:11px;text-align:center;padding:8px">+143<br>фото</div>
+          </div>
+          <div style="font-size:11px;color:#9ca3af;margin-top:8px">
+            💡 Нажми на любое фото конкурента — AI использует его стиль для генерации твоего
+          </div>
+        </div>
+      </div>
+
+      <!-- Планшка -->
+      <div id="tab-banner" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div class="card">
+            <h2>Настройки планшки</h2>
+            <div style="margin-bottom:12px">
+              <div style="font-size:12px;color:#777;margin-bottom:6px;font-weight:500">Загрузи своё фото</div>
+              <div style="border:2px dashed #e5e5e5;border-radius:10px;height:100px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:#9ca3af;cursor:pointer">
+                <div style="font-size:24px">📷</div>
+                <div style="font-size:12px">Нажми или перетащи</div>
+              </div>
+            </div>
+            <div style="margin-bottom:10px">
+              <div style="font-size:12px;color:#777;margin-bottom:6px;font-weight:500">Текст на планшке</div>
+              <input style="width:100%;border:1.5px solid #e5e5e5;border-radius:8px;padding:8px 12px;font-size:13px" value="Ворота DoorHan от 15 000₽">
+            </div>
+            <div style="margin-bottom:12px">
+              <div style="font-size:12px;color:#777;margin-bottom:6px;font-weight:500">Доп. текст</div>
+              <input style="width:100%;border:1.5px solid #e5e5e5;border-radius:8px;padding:8px 12px;font-size:13px" value="Установка под ключ • Гарантия 5 лет">
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:8px">
+              <div style="width:28px;height:28px;border-radius:50%;background:#5B47E0;cursor:pointer;border:2px solid transparent"></div>
+              <div style="width:28px;height:28px;border-radius:50%;background:#dc2626;cursor:pointer"></div>
+              <div style="width:28px;height:28px;border-radius:50%;background:#16a34a;cursor:pointer"></div>
+              <div style="width:28px;height:28px;border-radius:50%;background:#0f172a;cursor:pointer"></div>
+              <div style="width:28px;height:28px;border-radius:50%;background:#ea580c;cursor:pointer"></div>
+            </div>
+            <button class="btn btn-blue" style="width:100%;font-size:13px">🎨 Создать планшку</button>
+            <div style="font-size:11px;color:#9ca3af;margin-top:8px">💳 19 ₽</div>
+          </div>
+          <div class="card">
+            <h2>Превью</h2>
+
+            <!-- Подсказка -->
+            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px 12px;font-size:11px;color:#92400e;margin-bottom:10px;line-height:1.5">
+              💡 <b>Авито в выдаче обрезает до квадрата</b> — текст за пределами безопасной зоны не виден. Центрируй всё важное.
+            </div>
+
+            <!-- 4:3 — полное объявление -->
+            <div style="font-size:11px;color:#777;margin-bottom:4px;font-weight:500">4:3 — страница объявления</div>
+            <div style="width:100%;padding-top:75%;position:relative;background:linear-gradient(135deg,#1e3a5f,#4a7fa8);border-radius:10px;overflow:hidden;margin-bottom:10px">
+              <div style="position:absolute;inset:0;display:flex;align-items:flex-end">
+                <div style="font-size:48px;position:absolute;top:50%;left:50%;transform:translate(-50%,-60%)">🚪</div>
+                <!-- Серые зоны — обрезаются в выдаче -->
+                <div style="position:absolute;top:0;left:0;bottom:0;width:12.5%;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center">
+                  <div style="color:rgba(255,255,255,0.5);font-size:9px;writing-mode:vertical-rl;transform:rotate(180deg)">обрезается</div>
+                </div>
+                <div style="position:absolute;top:0;right:0;bottom:0;width:12.5%;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center">
+                  <div style="color:rgba(255,255,255,0.5);font-size:9px;writing-mode:vertical-rl">обрезается</div>
+                </div>
+                <!-- Безопасная зона -->
+                <div style="position:absolute;top:4px;left:12.5%;right:12.5%;bottom:4px;border:1.5px dashed rgba(255,255,255,0.4);border-radius:4px;pointer-events:none"></div>
+                <!-- Текст (в центре — видно везде) -->
+                <div style="background:rgba(91,71,224,0.92);width:75%;margin:0 auto 0;padding:8px 12px;position:absolute;bottom:0;left:12.5%">
+                  <div style="color:#fff;font-size:12px;font-weight:700">Ворота DoorHan от 15 000₽</div>
+                  <div style="color:rgba(255,255,255,0.85);font-size:10px;margin-top:1px">Установка под ключ • Гарантия 5 лет</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 1:1 — выдача -->
+            <div style="font-size:11px;color:#777;margin-bottom:4px;font-weight:500">1:1 — выдача (так видит покупатель сначала)</div>
+            <div style="width:120px;padding-top:120px;position:relative;background:linear-gradient(135deg,#2a4a6b,#5a8fb8);border-radius:10px;overflow:hidden;margin-bottom:10px">
+              <div style="position:absolute;inset:0;display:flex;align-items:flex-end">
+                <div style="font-size:36px;position:absolute;top:50%;left:50%;transform:translate(-50%,-65%)">🚪</div>
+                <div style="background:rgba(91,71,224,0.92);width:100%;padding:6px 10px">
+                  <div style="color:#fff;font-size:10px;font-weight:700">Ворота DoorHan от 15 000₽</div>
+                  <div style="color:rgba(255,255,255,0.85);font-size:9px">Установка под ключ</div>
+                </div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:#16a34a;margin-bottom:10px">✓ Текст центрирован — виден в обоих форматах</div>
+
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-green" style="font-size:12px;flex:1">⬇ Скачать</button>
+              <button class="btn btn-blue" style="font-size:12px;flex:1">→ В объявление</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Улучшение -->
+      <div id="tab-enhance" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div class="card">
+            <h2>Исходное фото</h2>
+            <div style="border:2px dashed #e5e5e5;border-radius:10px;height:160px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:#9ca3af;cursor:pointer;margin-bottom:12px">
+              <div style="font-size:32px">📷</div>
+              <div style="font-size:12px">Загрузи фото объявления</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+                <input type="checkbox" checked> Убрать фон / заменить на белый
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+                <input type="checkbox" checked> Повысить резкость и яркость
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+                <input type="checkbox"> Апскейл до 2048×2048
+              </label>
+            </div>
+            <button class="btn btn-blue" style="width:100%;font-size:13px;margin-top:12px">⬆️ Улучшить</button>
+            <div style="font-size:11px;color:#9ca3af;margin-top:8px">💳 9 ₽</div>
+          </div>
+          <div class="card">
+            <h2>Результат</h2>
+            <div style="height:160px;background:#f5f5f7;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#9ca3af;margin-bottom:12px">
+              <div style="font-size:32px">✨</div>
+              <div style="font-size:13px">Загрузи и улучши фото</div>
+            </div>
+            <div style="font-size:12px;color:#777;background:#f0fdf4;border-radius:8px;padding:10px">
+              💡 Качественное фото увеличивает CTR объявления на 35-60%
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function switchPhotoTab(el, tab) {
+  document.querySelectorAll('#screen-photo-tool .tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['gen','banner','enhance'].forEach(t => {
+    const el = document.getElementById('tab-'+t);
+    if(el) el.style.display = t === tab ? 'block' : 'none';
+  });
+}
+function showGenResult() {
+  document.getElementById('gen-result-empty').style.display = 'none';
+  document.getElementById('gen-result-done').style.display = 'block';
+}
+</script>
+
+<script>
+function showCopied() {
+  document.getElementById('copied-msg').style.display = 'block';
 }
 </script>
 </body>
