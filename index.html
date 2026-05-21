@@ -172,6 +172,7 @@ body{font-family:'Manrope',-apple-system,sans-serif;background:var(--bg);color:v
   <button class="nav-btn" onclick="showScreen('chat-photo')">🖼 6. Чат → Фото</button>
   <button class="nav-btn" onclick="showScreen('photo-tool')">✨ 7. Инструмент фото</button>
   <button class="nav-btn" onclick="showScreen('wallet')">💳 8. Кошелёк</button>
+  <button class="nav-btn" onclick="showScreen('ai-settings')">⚙️ 9. Настройки AI</button>
   <span class="nav-label">← переключай экраны</span>
 </div>
 
@@ -445,7 +446,7 @@ function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
-  const idx = ['chat-monitor','monitor-full','chat-parser','parser-progress','parser-result','chat-photo','photo-tool','wallet'].indexOf(name);
+  const idx = ['chat-monitor','monitor-full','chat-parser','parser-progress','parser-result','chat-photo','photo-tool','wallet','ai-settings'].indexOf(name);
   document.querySelectorAll('.nav-btn')[idx].classList.add('active');
 }
 function showSetup() {
@@ -1141,6 +1142,182 @@ function showCopied() {
   </div>
 </div>
 </div>
+
+<!-- ═══ ЭКРАН 9: НАСТРОЙКИ AI ═══ -->
+<div class="screen" id="screen-ai-settings">
+<div style="display:flex;width:100%;height:100%;background:#0D0D1A;overflow:hidden">
+
+  <!-- Сайдбар -->
+  <div style="width:220px;background:#12101F;border-right:1px solid rgba(255,255,255,0.07);padding:20px 0;flex-shrink:0">
+    <div style="padding:0 16px;margin-bottom:20px">
+      <div style="font-size:13px;font-weight:700;color:#fff">🔍 AI Авитолог PRO</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <div style="padding:9px 16px;font-size:13px;color:#9CA3AF;cursor:pointer;display:flex;align-items:center;gap:10px">💬 Чаты</div>
+      <div style="padding:9px 16px;font-size:13px;color:#9CA3AF;cursor:pointer;display:flex;align-items:center;gap:10px">📄 Документы</div>
+      <div style="padding:9px 16px;font-size:13px;color:#9CA3AF;cursor:pointer;display:flex;align-items:center;gap:10px">📊 Статистика</div>
+      <div style="padding:9px 16px;font-size:13px;color:#9CA3AF;cursor:pointer;display:flex;align-items:center;gap:10px">📍 Мониторинг</div>
+      <div style="padding:9px 16px;font-size:13px;color:#9CA3AF;cursor:pointer;display:flex;align-items:center;gap:10px">💳 Кошелёк</div>
+      <div style="padding:9px 16px;font-size:13px;color:#9F67FF;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;background:rgba(124,58,237,0.15);border-radius:0 8px 8px 0;margin-right:8px">⚙️ Настройки</div>
+    </div>
+  </div>
+
+  <!-- Контент -->
+  <div style="flex:1;overflow-y:auto;padding:28px 32px;max-width:780px">
+
+    <h1 style="font-size:20px;font-weight:800;color:#fff;margin-bottom:6px">Настройки AI ассистента</h1>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:28px">AI использует эти данные чтобы давать точные советы именно по вашей нише</p>
+
+    <!-- Вкладки -->
+    <div style="display:flex;gap:4px;margin-bottom:24px;background:#12101F;border-radius:10px;padding:4px;width:fit-content">
+      <button onclick="switchAiTab('business')" id="tab-business" style="padding:7px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:#7C3AED;color:#fff;font-family:'Manrope',sans-serif">О бизнесе</button>
+      <button onclick="switchAiTab('style')" id="tab-style" style="padding:7px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:transparent;color:#9CA3AF;font-family:'Manrope',sans-serif">Стиль AI</button>
+      <button onclick="switchAiTab('preview')" id="tab-preview" style="padding:7px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:transparent;color:#9CA3AF;font-family:'Manrope',sans-serif">Превью</button>
+    </div>
+
+    <!-- Вкладка 1: О бизнесе -->
+    <div id="aisettings-business">
+
+      <div style="background:#1A1828;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:24px;margin-bottom:16px">
+        <div style="font-size:14px;font-weight:700;color:#9F67FF;margin-bottom:18px;display:flex;align-items:center;gap:8px">
+          🏪 Что вы продаёте на Авито
+        </div>
+
+        <div style="margin-bottom:16px">
+          <label style="font-size:12px;color:#6b7280;font-weight:500;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Ваш товар / услуга</label>
+          <textarea style="width:100%;background:#12101F;border:1px solid rgba(255,255,255,0.1);border-radius:9px;padding:12px;font-size:14px;color:#fff;font-family:'Manrope',sans-serif;resize:vertical;min-height:80px;outline:none" placeholder="Например: гаражные ворота DoorHan, секционные и откатные. Работаем по Амурской области и Хабаровскому краю.">Гаражные ворота DoorHan — секционные, откатные, подъёмные. Монтаж и продажа по Амурской области.</textarea>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+          <div>
+            <label style="font-size:12px;color:#6b7280;font-weight:500;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Средний чек</label>
+            <input value="85 000 ₽" style="width:100%;background:#12101F;border:1px solid rgba(255,255,255,0.1);border-radius:9px;padding:10px 12px;font-size:14px;color:#fff;font-family:'Manrope',sans-serif;outline:none">
+          </div>
+          <div>
+            <label style="font-size:12px;color:#6b7280;font-weight:500;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">На Авито с</label>
+            <input value="2021 года" style="width:100%;background:#12101F;border:1px solid rgba(255,255,255,0.1);border-radius:9px;padding:10px 12px;font-size:14px;color:#fff;font-family:'Manrope',sans-serif;outline:none">
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:12px;color:#6b7280;font-weight:500;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Главные конкуренты (опционально)</label>
+          <input value="ВоротаМаркет, DoorHan официальный" style="width:100%;background:#12101F;border:1px solid rgba(255,255,255,0.1);border-radius:9px;padding:10px 12px;font-size:14px;color:#fff;font-family:'Manrope',sans-serif;outline:none" placeholder="Кто уже доминирует в выдаче?">
+        </div>
+      </div>
+
+      <div style="background:#1A1828;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:24px;margin-bottom:16px">
+        <div style="font-size:14px;font-weight:700;color:#9F67FF;margin-bottom:18px;display:flex;align-items:center;gap:8px">
+          🎯 Ваши цели
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:12px;border-radius:10px;border:1.5px solid #7C3AED;background:rgba(124,58,237,0.08)">
+            <input type="radio" name="goal" checked style="margin-top:2px;accent-color:#7C3AED">
+            <div><div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px">Максимум просмотров и позиций</div><div style="font-size:12px;color:#6b7280">Агрессивная стратегия, больший бюджет на VAS</div></div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.08)">
+            <input type="radio" name="goal" style="margin-top:2px;accent-color:#7C3AED">
+            <div><div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px">Стабильный поток заявок</div><div style="font-size:12px;color:#6b7280">Баланс между бюджетом и результатом</div></div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.08)">
+            <input type="radio" name="goal" style="margin-top:2px;accent-color:#7C3AED">
+            <div><div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px">Минимум затрат</div><div style="font-size:12px;color:#6b7280">Органическое продвижение без VAS</div></div>
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Вкладка 2: Стиль AI -->
+    <div id="aisettings-style" style="display:none">
+
+      <div style="background:#1A1828;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:24px;margin-bottom:16px">
+        <div style="font-size:14px;font-weight:700;color:#9F67FF;margin-bottom:18px">🗣 Тон общения AI</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:12px;border-radius:10px;border:1.5px solid #7C3AED;background:rgba(124,58,237,0.08)">
+            <input type="radio" name="tone" checked style="accent-color:#7C3AED">
+            <div><div style="font-size:13px;font-weight:600;color:#fff">Деловой и конкретный</div><div style="font-size:12px;color:#6b7280">Без воды — только цифры и действия</div></div>
+          </label>
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.08)">
+            <input type="radio" name="tone" style="accent-color:#7C3AED">
+            <div><div style="font-size:13px;font-weight:600;color:#fff">Развёрнутый с объяснениями</div><div style="font-size:12px;color:#6b7280">Подробно объясняет почему так, а не иначе</div></div>
+          </label>
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.08)">
+            <input type="radio" name="tone" style="accent-color:#7C3AED">
+            <div><div style="font-size:13px;font-weight:600;color:#fff">Дружеский наставник</div><div style="font-size:12px;color:#6b7280">Как опытный коллега — просто и по-человечески</div></div>
+          </label>
+        </div>
+      </div>
+
+      <div style="background:#1A1828;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:24px;margin-bottom:16px">
+        <div style="font-size:14px;font-weight:700;color:#9F67FF;margin-bottom:18px">🧠 Экспертиза AI</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+            <input type="checkbox" checked style="width:16px;height:16px;accent-color:#7C3AED;cursor:pointer">
+            <div style="font-size:13px;color:#fff">Анализировать конкурентов и давать сравнения</div>
+          </label>
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+            <input type="checkbox" checked style="width:16px;height:16px;accent-color:#7C3AED;cursor:pointer">
+            <div style="font-size:13px;color:#fff">Рекомендовать VAS-стратегию (Поднять / Выделить / XL)</div>
+          </label>
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+            <input type="checkbox" checked style="width:16px;height:16px;accent-color:#7C3AED;cursor:pointer">
+            <div style="font-size:13px;color:#fff">Предлагать формулы заголовков</div>
+          </label>
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+            <input type="checkbox" style="width:16px;height:16px;accent-color:#7C3AED;cursor:pointer">
+            <div style="font-size:13px;color:#fff">Анализировать фото конкурентов</div>
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Вкладка 3: Превью -->
+    <div id="aisettings-preview" style="display:none">
+      <div style="background:#1A1828;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:24px;margin-bottom:16px">
+        <div style="font-size:14px;font-weight:700;color:#9F67FF;margin-bottom:6px">👁 Как AI видит вас</div>
+        <div style="font-size:12px;color:#6b7280;margin-bottom:16px">Это то что AI знает о вас при каждом ответе</div>
+        <div style="background:#12101F;border-radius:10px;padding:16px;font-size:13px;line-height:1.8;color:#9CA3AF;font-family:monospace">
+          <span style="color:#7C3AED">Ты — AI Авитолог PRO</span>, эксперт по продвижению на Авито.<br><br>
+          <span style="color:#9F67FF">Пользователь:</span> продаёт гаражные ворота DoorHan (секционные, откатные, подъёмные). Работает по Амурской области. Средний чек 85 000 ₽. На Авито с 2021 года.<br><br>
+          <span style="color:#9F67FF">Цель:</span> максимум просмотров и позиций, готов инвестировать в VAS.<br><br>
+          <span style="color:#9F67FF">Конкуренты:</span> ВоротаМаркет, DoorHan официальный.<br><br>
+          <span style="color:#9F67FF">Стиль:</span> деловой и конкретный, без воды.
+        </div>
+      </div>
+      <div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.3);border-radius:12px;padding:16px;font-size:13px;color:#9CA3AF">
+        💡 <span style="color:#9F67FF;font-weight:600">Пример ответа AI с этими настройками:</span><br><br>
+        <span style="color:#fff">«По данным мониторинга: ты на 7-м месте по "гаражные ворота Благовещенск". Топ-3 занимает ВоротаМаркет с 45 объявлениями и VAS "Выделить". Рекомендую: подними 3 самых просматриваемых объявления + добавь в заголовок "под ключ" — это слово даёт +23% CTR в твоей нише.»</span>
+      </div>
+    </div>
+
+    <!-- Кнопка сохранить -->
+    <div style="margin-top:24px;display:flex;gap:12px;align-items:center">
+      <button onclick="saveAiSettings()" style="background:linear-gradient(90deg,#7C3AED,#9F67FF);color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif">
+        Сохранить настройки
+      </button>
+      <div id="ai-saved-msg" style="display:none;font-size:13px;color:#22c55e;font-weight:600">✓ Сохранено — AI уже учитывает эти данные</div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+function switchAiTab(tab) {
+  ['business','style','preview'].forEach(t => {
+    document.getElementById('aisettings-'+t).style.display = t === tab ? 'block' : 'none';
+    const btn = document.getElementById('tab-'+t);
+    btn.style.background = t === tab ? '#7C3AED' : 'transparent';
+    btn.style.color = t === tab ? '#fff' : '#9CA3AF';
+  });
+}
+function saveAiSettings() {
+  const msg = document.getElementById('ai-saved-msg');
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 3000);
+}
+</script>
 
 <script>
 let selectedAmt = 1000;
