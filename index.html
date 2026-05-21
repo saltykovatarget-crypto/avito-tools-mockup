@@ -171,6 +171,7 @@ body{font-family:'Manrope',-apple-system,sans-serif;background:var(--bg);color:v
   <button class="nav-btn" onclick="showScreen('parser-result')">✅ 5. Парсер (результат)</button>
   <button class="nav-btn" onclick="showScreen('chat-photo')">🖼 6. Чат → Фото</button>
   <button class="nav-btn" onclick="showScreen('photo-tool')">✨ 7. Инструмент фото</button>
+  <button class="nav-btn" onclick="showScreen('wallet')">💳 8. Кошелёк</button>
   <span class="nav-label">← переключай экраны</span>
 </div>
 
@@ -444,7 +445,7 @@ function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
-  const idx = ['chat-monitor','monitor-full','chat-parser','parser-progress','parser-result','chat-photo','photo-tool'].indexOf(name);
+  const idx = ['chat-monitor','monitor-full','chat-parser','parser-progress','parser-result','chat-photo','photo-tool','wallet'].indexOf(name);
   document.querySelectorAll('.nav-btn')[idx].classList.add('active');
 }
 function showSetup() {
@@ -1012,6 +1013,148 @@ function switchPhotoTab(el, tab) {
 function showGenResult() {
   document.getElementById('gen-result-empty').style.display = 'none';
   document.getElementById('gen-result-done').style.display = 'block';
+}
+</script>
+
+<script>
+function showCopied() {
+  document.getElementById('copied-msg').style.display = 'block';
+}
+</script>
+
+<!-- ═══ ЭКРАН 8: КОШЕЛЁК ═══ -->
+<div class="screen" id="screen-wallet">
+<div style="display:flex;width:100%;height:100%;background:#0D0D1A;overflow:hidden">
+
+  <!-- Сайдбар -->
+  <div style="width:220px;background:#12101F;border-right:1px solid rgba(255,255,255,0.07);padding:20px 0;flex-shrink:0">
+    <div style="padding:0 16px;margin-bottom:20px">
+      <div style="font-size:13px;font-weight:700;color:#fff">🔍 AI Авитолог PRO</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <div style="padding:9px 16px;font-size:13px;color:#9CA3AF;cursor:pointer;display:flex;align-items:center;gap:10px">💬 Чаты</div>
+      <div style="padding:9px 16px;font-size:13px;color:#9CA3AF;cursor:pointer;display:flex;align-items:center;gap:10px">📄 Документы</div>
+      <div style="padding:9px 16px;font-size:13px;color:#9CA3AF;cursor:pointer;display:flex;align-items:center;gap:10px">📊 Статистика</div>
+      <div style="padding:9px 16px;font-size:13px;color:#9CA3AF;cursor:pointer;display:flex;align-items:center;gap:10px">📍 Мониторинг</div>
+      <div style="padding:9px 16px;font-size:13px;color:#9F67FF;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;background:rgba(124,58,237,0.15);border-radius:0 8px 8px 0;margin-right:8px">💳 Кошелёк</div>
+      <div style="padding:9px 16px;font-size:13px;color:#9CA3AF;cursor:pointer;display:flex;align-items:center;gap:10px">⚙️ Настройки</div>
+    </div>
+  </div>
+
+  <!-- Контент -->
+  <div style="flex:1;overflow-y:auto;padding:28px 32px">
+
+    <!-- Хедер с балансом -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <h1 style="font-size:20px;font-weight:800;color:#fff">Кошелёк</h1>
+      <div style="display:flex;align-items:center;gap:8px;background:rgba(159,103,255,0.12);border:1px solid rgba(159,103,255,0.3);border-radius:99px;padding:6px 16px">
+        <span style="font-size:13px;color:#9CA3AF">💳</span>
+        <span style="font-size:14px;font-weight:800;color:#9F67FF">1 250 ₽</span>
+        <span style="font-size:11px;color:#6b7280">+ пополнить</span>
+      </div>
+    </div>
+
+    <!-- KPI -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
+      <div style="background:#1A1828;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px">
+        <div style="font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">БАЛАНС</div>
+        <div style="font-size:34px;font-weight:800;color:#9F67FF;line-height:1;margin-bottom:4px">1 250 ₽</div>
+        <div style="font-size:12px;color:#6b7280;margin-bottom:14px">доступно прямо сейчас</div>
+        <button onclick="document.getElementById('topup-block').style.display=document.getElementById('topup-block').style.display==='none'?'block':'none'" style="background:#16a34a;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer">+ Пополнить</button>
+      </div>
+      <div style="background:#1A1828;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px">
+        <div style="font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">ПОТРАЧЕНО</div>
+        <div style="font-size:34px;font-weight:800;color:#fff;line-height:1;margin-bottom:4px">890 ₽</div>
+        <div style="font-size:12px;color:#6b7280">май 2026</div>
+      </div>
+      <div style="background:#1A1828;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px">
+        <div style="font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">ПРОГОНОВ</div>
+        <div style="font-size:34px;font-weight:800;color:#fff;line-height:1;margin-bottom:4px">7</div>
+        <div style="font-size:12px;color:#6b7280">в этом месяце</div>
+      </div>
+    </div>
+
+    <!-- Пополнение -->
+    <div id="topup-block" style="display:none;background:#1A1828;border:1.5px solid #7C3AED;border-radius:14px;padding:20px;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:700;color:#9F67FF;margin-bottom:14px">Пополнить баланс</div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap" id="amt-btns">
+        <button onclick="selectAmt(this,500)"  style="padding:9px 20px;border-radius:9px;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:#9CA3AF;font-size:14px;font-weight:600;cursor:pointer;font-family:'Manrope',sans-serif">500 ₽</button>
+        <button onclick="selectAmt(this,1000)" style="padding:9px 20px;border-radius:9px;border:1.5px solid #7C3AED;background:rgba(124,58,237,0.15);color:#9F67FF;font-size:14px;font-weight:600;cursor:pointer;font-family:'Manrope',sans-serif">1 000 ₽</button>
+        <button onclick="selectAmt(this,2000)" style="padding:9px 20px;border-radius:9px;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:#9CA3AF;font-size:14px;font-weight:600;cursor:pointer;font-family:'Manrope',sans-serif">2 000 ₽</button>
+        <button onclick="selectAmt(this,5000)" style="padding:9px 20px;border-radius:9px;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:#9CA3AF;font-size:14px;font-weight:600;cursor:pointer;font-family:'Manrope',sans-serif">5 000 ₽</button>
+      </div>
+      <button id="pay-btn" style="background:linear-gradient(90deg,#7C3AED,#9F67FF);color:#fff;border:none;border-radius:9px;padding:12px 0;font-size:14px;font-weight:700;cursor:pointer;width:280px;display:block;margin-bottom:10px;font-family:'Manrope',sans-serif">Оплатить 1 000 ₽</button>
+      <div style="font-size:11px;color:#6b7280">Оплата через ЮKassa · Visa, Mastercard, СБП, ЮMoney</div>
+    </div>
+
+    <!-- Тарифы -->
+    <div style="background:#1A1828;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:700;color:#9F67FF;margin-bottom:16px">Стоимость инструментов</div>
+      <div style="display:flex;flex-direction:column;gap:0">
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+          <span style="font-size:20px;width:32px;text-align:center">🔍</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600;color:#fff">Анализ конкурентов</div><div style="font-size:11px;color:#6b7280;margin-top:2px">Парсинг выдачи Авито, до 150 объявлений</div></div>
+          <span style="font-size:12px;font-weight:700;color:#9F67FF;background:rgba(124,58,237,0.15);border-radius:99px;padding:4px 12px">190 ₽ / прогон</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+          <span style="font-size:20px;width:32px;text-align:center">📍</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600;color:#fff">Мониторинг позиций</div><div style="font-size:11px;color:#6b7280;margin-top:2px">Проверка позиций по ключевым словам</div></div>
+          <span style="font-size:12px;font-weight:700;color:#9F67FF;background:rgba(124,58,237,0.15);border-radius:99px;padding:4px 12px">90 ₽ / прогон</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+          <span style="font-size:20px;width:32px;text-align:center">🖼</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600;color:#fff">Редактор баннеров</div><div style="font-size:11px;color:#6b7280;margin-top:2px">Генерация фото для объявления</div></div>
+          <span style="font-size:11px;color:#6b7280;background:rgba(255,255,255,0.05);border-radius:99px;padding:4px 12px">скоро</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 0">
+          <span style="font-size:20px;width:32px;text-align:center">📊</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600;color:#fff">Анализ статистики XLS</div><div style="font-size:11px;color:#6b7280;margin-top:2px">Загрузка и анализ файла Авито</div></div>
+          <span style="font-size:11px;color:#6b7280;background:rgba(255,255,255,0.05);border-radius:99px;padding:4px 12px">скоро</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- История -->
+    <div style="background:#1A1828;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="font-size:14px;font-weight:700;color:#9F67FF">Последние операции</div>
+        <button style="font-size:12px;color:#9F67FF;background:none;border:none;cursor:pointer;font-weight:600;font-family:'Manrope',sans-serif">Вся история →</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.07);color:#6b7280;font-weight:500;font-size:11px">Дата</th>
+            <th style="text-align:left;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.07);color:#6b7280;font-weight:500;font-size:11px">Инструмент</th>
+            <th style="text-align:left;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.07);color:#6b7280;font-weight:500;font-size:11px">Детали</th>
+            <th style="text-align:right;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.07);color:#6b7280;font-weight:500;font-size:11px">Сумма</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:11px 10px;color:#6b7280;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.04)">20.05 16:42</td><td style="padding:11px 10px;font-weight:500;color:#fff;border-bottom:1px solid rgba(255,255,255,0.04)">🔍 Анализ конкурентов</td><td style="padding:11px 10px;color:#6b7280;border-bottom:1px solid rgba(255,255,255,0.04)">юрист по грузоперевозкам</td><td style="padding:11px 10px;text-align:right;font-weight:700;color:#ef4444;border-bottom:1px solid rgba(255,255,255,0.04)">-190 ₽</td></tr>
+          <tr><td style="padding:11px 10px;color:#6b7280;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.04)">20.05 14:11</td><td style="padding:11px 10px;font-weight:500;color:#fff;border-bottom:1px solid rgba(255,255,255,0.04)">📍 Мониторинг</td><td style="padding:11px 10px;color:#6b7280;border-bottom:1px solid rgba(255,255,255,0.04)">DoorHan — 12 позиций</td><td style="padding:11px 10px;text-align:right;font-weight:700;color:#ef4444;border-bottom:1px solid rgba(255,255,255,0.04)">-90 ₽</td></tr>
+          <tr><td style="padding:11px 10px;color:#6b7280;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.04)">19.05 10:30</td><td style="padding:11px 10px;font-weight:500;color:#fff;border-bottom:1px solid rgba(255,255,255,0.04)">💳 Пополнение</td><td style="padding:11px 10px;color:#6b7280;border-bottom:1px solid rgba(255,255,255,0.04)">Банковская карта *4242</td><td style="padding:11px 10px;text-align:right;font-weight:700;color:#22c55e;border-bottom:1px solid rgba(255,255,255,0.04)">+2 000 ₽</td></tr>
+          <tr><td style="padding:11px 10px;color:#6b7280;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.04)">18.05 18:05</td><td style="padding:11px 10px;font-weight:500;color:#fff;border-bottom:1px solid rgba(255,255,255,0.04)">📍 Мониторинг</td><td style="padding:11px 10px;color:#6b7280;border-bottom:1px solid rgba(255,255,255,0.04)">Газон Краснодар — 8 позиций</td><td style="padding:11px 10px;text-align:right;font-weight:700;color:#ef4444;border-bottom:1px solid rgba(255,255,255,0.04)">-90 ₽</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+let selectedAmt = 1000;
+function selectAmt(btn, amt) {
+  selectedAmt = amt;
+  document.querySelectorAll('#amt-btns button').forEach(b => {
+    b.style.borderColor = 'rgba(255,255,255,0.15)';
+    b.style.background = 'transparent';
+    b.style.color = '#9CA3AF';
+  });
+  btn.style.borderColor = '#7C3AED';
+  btn.style.background = 'rgba(124,58,237,0.15)';
+  btn.style.color = '#9F67FF';
+  document.getElementById('pay-btn').textContent = `Оплатить ${amt.toLocaleString('ru')} ₽`;
 }
 </script>
 
