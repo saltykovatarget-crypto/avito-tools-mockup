@@ -48,10 +48,11 @@
   .sidebar-bottom{margin-top:auto;padding-top:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:2px}
 
   /* Chat layout */
-  .chat-wrap{display:flex;flex-direction:column;height:100vh}
+  .chat-wrap{display:flex;flex-direction:column;min-height:100vh}
   .chat-topbar{
     padding:14px 28px;border-bottom:1px solid var(--border);
     display:flex;align-items:center;justify-content:space-between;gap:14px;
+    position:sticky;top:0;background:var(--bg);z-index:10;
   }
   .chat-title{font-weight:700;font-size:14px}
   .chat-sub{font-size:12px;color:var(--muted);margin-top:2px}
@@ -63,7 +64,7 @@
   .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--brand-2),var(--brand));color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px}
 
   .chat-messages{
-    flex:1;overflow-y:auto;
+    flex:1;
     padding:24px 28px;display:flex;flex-direction:column;gap:18px;
     max-width:900px;width:100%;margin:0 auto;
   }
@@ -235,6 +236,7 @@
     border-top:1px solid var(--border);
     padding:16px 28px;
     background:var(--bg);
+    position:sticky;bottom:0;
   }
   .chat-input-wrap{
     max-width:900px;margin:0 auto;
