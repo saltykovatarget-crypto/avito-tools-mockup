@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Чат с парсером — AI Авитолог PRO (мокап)</title>
+<style>
+  [data-theme="dark"] {
+    --bg: #0E1118; --bg-gradient-top: rgba(111, 66, 193, 0.06);
+    --card: #141926; --card-hover: #1a2030; --input-bg: #0c0f15;
+    --text: #FFFFFF; --muted: #8A90A8;
+    --border: rgba(255, 255, 255, 0.08); --border-strong: rgba(255, 255, 255, 0.14);
+    --brand: #6F42C1; --brand-2: #9A7FE0; --brand-soft: rgba(111, 66, 193, 0.15);
+    --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+    --image-placeholder: linear-gradient(135deg, #1a2030 0%, #232a3d 100%);
+  }
+  [data-theme="light"] {
+    --bg: #f8fafc; --bg-gradient-top: rgba(111, 66, 193, 0.04);
+    --card: #ffffff; --card-hover: #fafbfc; --input-bg: #fafbfc;
+    --text: #0f172a; --muted: #64748b;
+    --border: #e2e8f0; --border-strong: #cbd5e1;
+    --brand: #6F42C1; --brand-2: #9A7FE0; --brand-soft: rgba(111, 66, 193, 0.08);
+    --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+    --image-placeholder: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  }
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh;background-image:radial-gradient(ellipse at top, var(--bg-gradient-top), transparent 60%)}
+  a{color:var(--brand-2);text-decoration:none}
+  button{font-family:inherit;cursor:pointer}
+
+  .layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+
+  /* Sidebar (same as cabinet) */
+  .sidebar{background:var(--card);border-right:1px solid var(--border);padding:18px 12px 16px;display:flex;flex-direction:column}
+  .logo-row{display:flex;align-items:center;gap:8px;padding:6px 12px 18px}
+  .logo-img{width:42px;height:42px;flex-shrink:0;object-fit:contain}
+  .logo-text{font-weight:700;font-size:15px;color:var(--text);line-height:1.1;white-space:nowrap;display:flex;align-items:center;gap:6px}
+  .pro-badge{font-size:10px;color:#fff;background:var(--brand);font-weight:700;letter-spacing:.5px;padding:3px 7px;border-radius:6px;line-height:1}
+  .btn-new-chat{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:11px 16px;font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px}
+  .btn-new-chat:hover{background:#5a36a3}
+  .nav-list{display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--text);font-weight:500;font-size:13px;transition:background .15s}
+  .nav-item:hover{background:var(--card-hover)}
+  .nav-item.active{background:var(--brand-soft);color:var(--brand-2)}
+  [data-theme="light"] .nav-item.active{color:var(--brand)}
+  .nav-ic{width:16px;height:16px;flex-shrink:0;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .nav-item .badge{margin-left:auto;background:var(--brand);color:#fff;font-size:10px;padding:2px 6px;border-radius:999px;font-weight:700}
+  .sidebar-bottom{margin-top:auto;padding-top:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:2px}
+
+  /* Chat layout */
+  .chat-wrap{display:flex;flex-direction:column;height:100vh}
+  .chat-topbar{
+    padding:14px 28px;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+  }
+  .chat-title{font-weight:700;font-size:14px}
+  .chat-sub{font-size:12px;color:var(--muted);margin-top:2px}
+  .topbar-right{display:flex;align-items:center;gap:8px}
+  .chip{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--text)}
+  .chip-muted{color:var(--muted);font-weight:500}
+  .chip-brand{color:var(--brand-2);font-weight:700}
+  [data-theme="light"] .chip-brand{color:var(--brand)}
+  .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--brand-2),var(--brand));color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px}
+
+  .chat-messages{
+    flex:1;overflow-y:auto;
+    padding:24px 28px;display:flex;flex-direction:column;gap:18px;
+    max-width:900px;width:100%;margin:0 auto;
+  }
+
+  /* Messages */
+  .msg-row{display:flex;gap:12px}
+  .msg-row.user{flex-direction:row-reverse}
+  .msg-avatar{
+    width:34px;height:34px;border-radius:50%;
+    display:grid;place-items:center;font-weight:700;font-size:12px;
+    flex-shrink:0;
+  }
+  .msg-avatar.ai{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff}
+  .msg-avatar.user{background:var(--input-bg);border:1px solid var(--border);color:var(--muted)}
+
+  .msg-content{max-width:75%;display:flex;flex-direction:column;gap:6px}
+  .msg-row.user .msg-content{align-items:flex-end}
+  .msg-bubble{
+    padding:12px 16px;border-radius:14px;
+    background:var(--card);border:1px solid var(--border);
+    font-size:14px;line-height:1.55;color:var(--text);
+    word-wrap:break-word;
+  }
+  .msg-row.user .msg-bubble{background:var(--brand-soft);border-color:rgba(111,66,193,0.3)}
+  .msg-bubble p{margin:0 0 8px}
+  .msg-bubble p:last-child{margin-bottom:0}
+  .msg-bubble strong{color:var(--brand-2);font-weight:700}
+  [data-theme="light"] .msg-bubble strong{color:var(--brand)}
+  .msg-time{font-size:11px;color:var(--muted);padding:0 6px}
+
+  /* PARSER CARD — три состояния */
+  .parser-card{
+    width:100%;max-width:560px;
+    background:var(--card);border:1px solid var(--border);
+    border-radius:14px;overflow:hidden;
+  }
+  .parser-card-header{
+    padding:14px 18px;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:12px;
+    background:var(--brand-soft);
+  }
+  .parser-card-icon{
+    width:32px;height:32px;border-radius:8px;
+    background:var(--brand);color:#fff;
+    display:grid;place-items:center;flex-shrink:0;
+  }
+  .parser-card-icon svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .parser-card-title{font-weight:700;font-size:14px;color:var(--text)}
+  .parser-card-sub{font-size:11px;color:var(--muted);margin-top:1px}
+
+  .parser-card-body{padding:18px}
+  .parser-form-label{
+    font-size:11px;color:var(--muted);text-transform:uppercase;
+    letter-spacing:1px;font-weight:700;margin:0 0 6px;display:block;
+  }
+  .parser-form-input{
+    width:100%;padding:11px 14px;
+    border:1px solid var(--border);border-radius:8px;
+    font-size:13px;font-family:inherit;
+    background:var(--input-bg);color:var(--text);
+  }
+  .parser-form-input:focus{outline:none;border-color:var(--brand);background:var(--card)}
+  .parser-form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .parser-pages{display:flex;gap:6px}
+  .parser-page-btn{
+    flex:1;padding:10px;border:1px solid var(--border);
+    border-radius:7px;background:var(--input-bg);color:var(--text);
+    font-weight:600;font-size:13px;cursor:pointer;
+  }
+  .parser-page-btn.selected{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+  .parser-card-footer{
+    padding:14px 18px;border-top:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+  }
+  .parser-price{font-size:14px;color:var(--text);font-weight:700}
+  .parser-price-sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .parser-price .quota-tag{
+    display:inline-block;background:rgba(16,185,129,0.18);color:#34d399;
+    font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;
+    text-transform:uppercase;letter-spacing:.5px;margin-right:6px;
+  }
+  .btn-parser-run{
+    background:var(--brand);color:#fff;border:none;border-radius:8px;
+    padding:10px 18px;font-weight:700;font-size:13px;
+    box-shadow:0 4px 12px rgba(111,66,193,.3);
+  }
+  .btn-parser-run:hover{background:#5a36a3}
+
+  /* Progress state */
+  .progress-list{display:flex;flex-direction:column;gap:10px}
+  .progress-step{
+    display:flex;align-items:center;gap:10px;
+    font-size:13px;color:var(--text);
+  }
+  .progress-icon{
+    width:20px;height:20px;border-radius:50%;
+    display:grid;place-items:center;flex-shrink:0;
+  }
+  .progress-icon.done{background:rgba(16,185,129,0.18);color:#34d399}
+  .progress-icon.active{background:rgba(245,158,11,0.18);color:#fbbf24}
+  .progress-icon.pending{background:var(--input-bg);color:var(--muted)}
+  .progress-icon svg{width:12px;height:12px;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .progress-pulse{
+    width:6px;height:6px;border-radius:50%;background:var(--amber);
+    animation:pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:.4;transform:scale(.95)}50%{opacity:1;transform:scale(1.1)}}
+  .progress-step.pending{color:var(--muted)}
+  .progress-detail{font-size:11px;color:var(--muted);margin-left:auto}
+  .progress-bar-wrap{
+    margin-top:14px;
+    background:var(--input-bg);border-radius:6px;height:6px;overflow:hidden;
+  }
+  .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand-2));border-radius:6px;width:58%;transition:width .3s}
+
+  .btn-cancel{
+    background:transparent;color:var(--muted);
+    border:1px solid var(--border-strong);border-radius:8px;
+    padding:10px 16px;font-weight:600;font-size:12px;
+  }
+  .btn-cancel:hover{color:var(--red);border-color:var(--red)}
+
+  /* Result state */
+  .result-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+  .result-kpi{
+    background:var(--input-bg);border:1px solid var(--border);
+    border-radius:8px;padding:10px;text-align:center;
+  }
+  .result-kpi-val{font-size:18px;font-weight:800;color:var(--text);line-height:1}
+  .result-kpi-val .unit{font-size:10px;color:var(--muted);font-weight:500}
+  .result-kpi-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px;font-weight:600}
+
+  .result-top-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin:0 0 8px}
+  .result-photos{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin:0 -2px;scrollbar-width:thin}
+  .result-photo{
+    flex-shrink:0;width:64px;height:64px;border-radius:6px;
+    background:var(--image-placeholder);
+    display:grid;place-items:center;color:var(--muted);position:relative;
+    border:1px solid var(--border);
+  }
+  .result-photo svg{width:18px;height:18px;stroke-width:1.5;opacity:.5}
+  .result-photo-views{
+    position:absolute;bottom:2px;right:2px;
+    background:rgba(15,23,42,.85);color:#fff;
+    font-size:9px;font-weight:700;padding:1px 4px;border-radius:3px;
+  }
+  [data-theme="light"] .result-photo-views{background:rgba(255,255,255,.95);color:var(--text)}
+
+  .result-actions{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+  .btn-soft-sm{
+    background:var(--input-bg);color:var(--text);
+    border:1px solid var(--border);border-radius:8px;
+    padding:7px 12px;font-weight:600;font-size:12px;
+    display:flex;align-items:center;gap:6px;
+  }
+  .btn-soft-sm:hover{border-color:var(--border-strong)}
+  .btn-soft-sm svg{width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .btn-primary-sm{
+    background:var(--brand);color:#fff;border:none;border-radius:8px;
+    padding:7px 14px;font-weight:700;font-size:12px;
+    box-shadow:0 4px 12px rgba(111,66,193,.25);
+    display:flex;align-items:center;gap:6px;
+  }
+  .btn-primary-sm:hover{background:#5a36a3}
+
+  /* Input bar */
+  .chat-input-bar{
+    border-top:1px solid var(--border);
+    padding:16px 28px;
+    background:var(--bg);
+  }
+  .chat-input-wrap{
+    max-width:900px;margin:0 auto;
+    display:flex;align-items:flex-end;gap:10px;
+    background:var(--card);border:1px solid var(--border);
+    border-radius:14px;padding:8px 8px 8px 16px;
+  }
+  .chat-input{
+    flex:1;background:transparent;border:none;outline:none;
+    font-family:inherit;font-size:14px;color:var(--text);
+    padding:8px 0;resize:none;max-height:120px;
+  }
+  .chat-input::placeholder{color:var(--muted)}
+  .chat-input-actions{display:flex;align-items:center;gap:4px}
+  .input-icon-btn{
+    width:32px;height:32px;border-radius:7px;
+    background:transparent;border:none;color:var(--muted);
+    display:grid;place-items:center;cursor:pointer;
+    transition:color .15s,background .15s;
+  }
+  .input-icon-btn:hover{color:var(--text);background:var(--input-bg)}
+  .input-icon-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .input-send-btn{
+    width:36px;height:36px;border-radius:8px;
+    background:var(--brand);color:#fff;border:none;
+    display:grid;place-items:center;cursor:pointer;
+  }
+  .input-send-btn:hover{background:#5a36a3}
+  .input-send-btn svg{width:16px;height:16px;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .input-hint{
+    max-width:900px;margin:6px auto 0;font-size:11px;color:var(--muted);
+    text-align:center;
+  }
+
+  /* State demo divider */
+  .state-divider{
+    display:flex;align-items:center;gap:10px;
+    margin:30px 0 10px;padding:0 4px;
+  }
+  .state-divider::before,.state-divider::after{
+    content:'';flex:1;height:1px;background:var(--border);
+  }
+  .state-divider span{
+    font-size:11px;color:var(--muted);text-transform:uppercase;
+    letter-spacing:1px;font-weight:700;
+  }
+
+  .build-marker{position:fixed;bottom:8px;right:12px;font-size:10px;color:var(--muted);opacity:.5;font-family:monospace}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo-row">
+      <img class="logo-img" src="logo-header.png" alt="" />
+      <div class="logo-text">AI Авитолог<span class="pro-badge">PRO</span></div>
+    </div>
+    <button class="btn-new-chat">
+      <svg class="nav-ic" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Новый чат
+    </button>
+    <div class="nav-list">
+      <a class="nav-item" href="cabinet.html"><svg class="nav-ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+      <a class="nav-item active" href="chat.html"><svg class="nav-ic" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Чат AI<span class="badge">3</span></a>
+      <a class="nav-item" href="parser.html"><svg class="nav-ic" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Инструменты</a>
+    </div>
+    <div class="sidebar-bottom">
+      <a class="nav-item" href="#" id="theme-toggle"><svg class="nav-ic" id="theme-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span id="theme-label">Светлая тема</span></a>
+      <a class="nav-item" href="billing.html"><svg class="nav-ic" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Биллинг</a>
+      <a class="nav-item" href="wallet.html"><svg class="nav-ic" viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>Кошелёк</a>
+    </div>
+  </aside>
+
+  <!-- CHAT -->
+  <div class="chat-wrap">
+
+    <div class="chat-topbar">
+      <div>
+        <div class="chat-title">Ниша: ворота гаражные · Москва</div>
+        <div class="chat-sub">Шаг 1 из 10 · Анализ конкурентов</div>
+      </div>
+      <div class="topbar-right">
+        <div class="chip"><span class="chip-muted">AI</span><span>142 / 300</span></div>
+        <div class="chip"><span class="chip-muted">Парсер</span><span>2 / 5</span></div>
+        <div class="avatar">Л</div>
+      </div>
+    </div>
+
+    <div class="chat-messages">
+
+      <!-- AI вступление -->
+      <div class="msg-row">
+        <div class="msg-avatar ai">AI</div>
+        <div class="msg-content">
+          <div class="msg-bubble">
+            <p>Привет, Лера. Начинаем <strong>Шаг 1 — анализ ниши и конкурентов</strong>.</p>
+            <p>Дай мне ссылку на выдачу Авито в твоей нише — я запущу парсер, соберу топ-200 объявлений с фото, продавцов и стратегий продвижения. Через 20 минут будет полный разбор кто доминирует и где можно играть.</p>
+          </div>
+          <span class="msg-time">14:02</span>
+        </div>
+      </div>
+
+      <!-- Юзер -->
+      <div class="msg-row user">
+        <div class="msg-avatar user">Л</div>
+        <div class="msg-content">
+          <div class="msg-bubble">https://www.avito.ru/moskva/uslugi?q=ворота+гаражные</div>
+          <span class="msg-time">14:03</span>
+        </div>
+      </div>
+
+      <!-- AI с парсер-карточкой (состояние 1: ФОРМА) -->
+      <div class="msg-row">
+        <div class="msg-avatar ai">AI</div>
+        <div class="msg-content">
+          <div class="msg-bubble">
+            <p>Отлично, ниша «ворота гаражные» в Москве. Настрой параметры и запускай:</p>
+          </div>
+
+          <!-- ============ ParserCard — состояние 1: ФОРМА ============ -->
+          <div class="parser-card">
+            <div class="parser-card-header">
+              <div class="parser-card-icon">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+              <div>
+                <div class="parser-card-title">Парсер ниши Авито</div>
+                <div class="parser-card-sub">До 200 объявлений · ~20 минут</div>
+              </div>
+            </div>
+
+            <div class="parser-card-body">
+              <label class="parser-form-label">Ссылка на выдачу</label>
+              <input class="parser-form-input" value="https://www.avito.ru/moskva/uslugi?q=ворота+гаражные" readonly />
+
+              <div class="parser-form-row">
+                <div>
+                  <label class="parser-form-label">Страниц</label>
+                  <div class="parser-pages">
+                    <button class="parser-page-btn">1</button>
+                    <button class="parser-page-btn">2</button>
+                    <button class="parser-page-btn">3</button>
+                    <button class="parser-page-btn selected">4</button>
+                  </div>
+                </div>
+                <div>
+                  <label class="parser-form-label">Кого парсим</label>
+                  <button class="parser-form-input" style="text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+                    <span>Все объявления</span>
+                    <svg width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="parser-card-footer">
+              <div>
+                <div class="parser-price">
+                  <span class="quota-tag">Из квоты</span>
+                  Бесплатно
+                </div>
+                <div class="parser-price-sub">Осталось 2 из 5 в этом месяце</div>
+              </div>
+              <button class="btn-parser-run">Запустить →</button>
+            </div>
+          </div>
+
+          <span class="msg-time">14:03</span>
+        </div>
+      </div>
+
+      <!-- ============ Разделитель: то же сообщение, состояние 2: ПРОГРЕСС ============ -->
+      <div class="state-divider"><span>↓ через ~30 секунд карточка превращается ↓</span></div>
+
+      <div class="msg-row">
+        <div class="msg-avatar ai">AI</div>
+        <div class="msg-content">
+          <div class="msg-bubble">
+            <p>Парсер запущен. Я отслеживаю прогресс — пиши пока другие вопросы, отвечу.</p>
+          </div>
+
+          <!-- ============ ParserCard — состояние 2: ПРОГРЕСС ============ -->
+          <div class="parser-card">
+            <div class="parser-card-header">
+              <div class="parser-card-icon">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+              <div>
+                <div class="parser-card-title">Парсер работает — ворота гаражные · Москва</div>
+                <div class="parser-card-sub">Идёт 11 минут · осталось ~9 минут</div>
+              </div>
+            </div>
+
+            <div class="parser-card-body">
+              <div class="progress-list">
+                <div class="progress-step">
+                  <div class="progress-icon done"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <span>Загружена выдача — 156 объявлений</span>
+                  <span class="progress-detail">11с</span>
+                </div>
+                <div class="progress-step">
+                  <div class="progress-icon active"><div class="progress-pulse"></div></div>
+                  <span>Парсинг деталей объявлений</span>
+                  <span class="progress-detail">87 / 156</span>
+                </div>
+                <div class="progress-step pending">
+                  <div class="progress-icon pending">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
+                  </div>
+                  <span>Сбор данных продавцов</span>
+                </div>
+                <div class="progress-step pending">
+                  <div class="progress-icon pending">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
+                  </div>
+                  <span>AI-разбор результата</span>
+                </div>
+              </div>
+              <div class="progress-bar-wrap"><div class="progress-bar-fill"></div></div>
+            </div>
+
+            <div class="parser-card-footer">
+              <div class="parser-price-sub" style="margin-top:0">Уведомлю в Telegram когда готово</div>
+              <button class="btn-cancel">Остановить</button>
+            </div>
+          </div>
+
+          <span class="msg-time">14:14</span>
+        </div>
+      </div>
+
+      <!-- ============ Разделитель: состояние 3: РЕЗУЛЬТАТ ============ -->
+      <div class="state-divider"><span>↓ через ~20 минут парсер завершён ↓</span></div>
+
+      <div class="msg-row">
+        <div class="msg-avatar ai">AI</div>
+        <div class="msg-content">
+
+          <!-- ============ ParserCard — состояние 3: РЕЗУЛЬТАТ ============ -->
+          <div class="parser-card">
+            <div class="parser-card-header">
+              <div class="parser-card-icon" style="background:var(--green)">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div>
+                <div class="parser-card-title">Готово — ворота гаражные · Москва</div>
+                <div class="parser-card-sub">156 объявлений · 19 аккаунтов · 4 страницы</div>
+              </div>
+            </div>
+
+            <div class="parser-card-body">
+              <div class="result-kpis">
+                <div class="result-kpi">
+                  <div class="result-kpi-val">156</div>
+                  <div class="result-kpi-lbl">объявлений</div>
+                </div>
+                <div class="result-kpi">
+                  <div class="result-kpi-val">19</div>
+                  <div class="result-kpi-lbl">аккаунтов</div>
+                </div>
+                <div class="result-kpi">
+                  <div class="result-kpi-val">78<span class="unit">%</span></div>
+                  <div class="result-kpi-lbl">с VAS</div>
+                </div>
+                <div class="result-kpi">
+                  <div class="result-kpi-val">48 900<span class="unit">₽</span></div>
+                  <div class="result-kpi-lbl">медиана</div>
+                </div>
+              </div>
+
+              <div class="result-top-label">Топ-10 объявлений</div>
+              <div class="result-photos">
+                <div class="result-photo"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="result-photo-views">948</span></div>
+                <div class="result-photo"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="result-photo-views">891</span></div>
+                <div class="result-photo"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="result-photo-views">437</span></div>
+                <div class="result-photo"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="result-photo-views">389</span></div>
+                <div class="result-photo"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="result-photo-views">342</span></div>
+                <div class="result-photo"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="result-photo-views">298</span></div>
+                <div class="result-photo"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="result-photo-views">274</span></div>
+                <div class="result-photo"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span class="result-photo-views">245</span></div>
+              </div>
+
+              <div class="result-actions">
+                <a href="parser-report.html" class="btn-soft-sm">
+                  <svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                  Полный отчёт
+                </a>
+                <button class="btn-soft-sm">
+                  <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  XLSX
+                </button>
+                <button class="btn-soft-sm">
+                  <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/></svg>
+                  Прогнать ещё раз
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="msg-bubble" style="margin-top:8px">
+            <p><strong>Ниша концентрированная.</strong> 5 аккаунтов забирают 73% просмотров — DoorHan, Алютех, Doorlock, ГаражСтрой, Ворота-Профи. Остальные 14 продавцов делят 27%.</p>
+            <p><strong>VAS-стратегия лидеров.</strong> Все топ-5 используют выделение + поднятие. Без VAS попасть в топ выдачи невозможно.</p>
+            <p><strong>Где можно играть.</strong> Второй эшелон (8–15 место) использует слабые фото и шаблонные тексты. Через сильную обложку + конкретные сроки можно вытащить просмотры из этого пула без прямой конкуренции с DoorHan.</p>
+            <p>Готова перейти к <strong>Шагу 2 — сегментация аудитории</strong>? Решим против кого играть и где у конкурентов слабые места.</p>
+          </div>
+
+          <span class="msg-time">14:22</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="chat-input-bar">
+      <div class="chat-input-wrap">
+        <button class="input-icon-btn" title="Прикрепить файл">
+          <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+        <button class="input-icon-btn" title="Прикрепить изображение">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </button>
+        <textarea class="chat-input" placeholder="Напишите сообщение..." rows="1"></textarea>
+        <div class="chat-input-actions">
+          <button class="input-send-btn" title="Отправить">
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="input-hint">Поддерживаемые файлы: .pdf, .docx, .xlsx, .csv и другие до 20 МБ · Максимум 3 файла</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const html=document.documentElement;
+  const toggle=document.getElementById('theme-toggle');
+  const label=document.getElementById('theme-label');
+  const icon=document.getElementById('theme-icon');
+  const moonPath='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  const sunPath='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  toggle.addEventListener('click',e=>{
+    e.preventDefault();
+    const isDark=html.getAttribute('data-theme')==='dark';
+    html.setAttribute('data-theme',isDark?'light':'dark');
+    label.textContent=isDark?'Тёмная тема':'Светлая тема';
+    icon.innerHTML=isDark?sunPath:moonPath;
+  });
+</script>
+<div class="build-marker">мокап чата с парсером R1 · 2026-05-28</div>
+</body>
+</html>
