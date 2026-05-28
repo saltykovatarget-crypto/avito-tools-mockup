@@ -52,7 +52,7 @@
   .chat-topbar{
     padding:14px 28px;border-bottom:1px solid var(--border);
     display:flex;align-items:center;justify-content:space-between;gap:14px;
-    position:sticky;top:0;background:var(--bg);z-index:10;
+    position:sticky;top:0;background:var(--bg);z-index:10;height:62px;
   }
   .chat-title{font-weight:700;font-size:14px}
   .chat-sub{font-size:12px;color:var(--muted);margin-top:2px}
@@ -68,6 +68,45 @@
     padding:24px 28px;display:flex;flex-direction:column;gap:18px;
     max-width:900px;width:100%;margin:0 auto;
   }
+
+  /* ============ Steps bar ============ */
+  .steps-bar{
+    padding:16px 28px;border-bottom:1px solid var(--border);
+    background:var(--bg);
+    position:sticky;top:62px;z-index:9;
+  }
+  .steps-track{
+    display:flex;align-items:center;
+    max-width:900px;margin:0 auto;
+  }
+  .step-dot{
+    width:28px;height:28px;border-radius:50%;
+    background:var(--input-bg);
+    border:1px solid var(--border);
+    display:grid;place-items:center;flex-shrink:0;
+    cursor:pointer;color:var(--muted);
+    font-size:11px;font-weight:700;
+    position:relative;transition:all .15s;
+  }
+  .step-dot:hover{border-color:var(--brand-2);color:var(--brand-2)}
+  .step-dot.done{background:var(--brand);border-color:var(--brand);color:#fff}
+  .step-dot.active{
+    background:var(--brand-soft);border-color:var(--brand);color:var(--brand-2);
+    box-shadow:0 0 0 4px rgba(111,66,193,0.15);
+  }
+  [data-theme="light"] .step-dot.active{color:var(--brand)}
+  .step-num{display:flex;align-items:center;justify-content:center}
+  .step-num svg{width:14px;height:14px}
+  .step-line{
+    flex:1;height:2px;background:var(--border);min-width:8px;margin:0 4px;
+  }
+  .step-line.done{background:var(--brand)}
+  .step-label-tip{
+    position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);
+    font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+    color:var(--brand-2);white-space:nowrap;
+  }
+  [data-theme="light"] .step-label-tip{color:var(--brand)}
 
   /* Messages */
   .msg-row{display:flex;gap:12px}
@@ -352,6 +391,36 @@
         <div class="chip"><span class="chip-muted">AI</span><span>142 / 300</span></div>
         <div class="chip"><span class="chip-muted">Парсер</span><span>2 / 5</span></div>
         <div class="avatar">Л</div>
+      </div>
+    </div>
+
+    <!-- ============ Полоска прогресса 10 шагов ============ -->
+    <div class="steps-bar">
+      <div class="steps-track">
+        <button class="step-dot done" title="Шаг 1 — Анализ ниши и конкурентов">
+          <span class="step-num"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </button>
+        <div class="step-line done"></div>
+        <button class="step-dot active" title="Шаг 2 — Стратегия размещения">
+          <span class="step-num">2</span>
+          <span class="step-label-tip">Стратегия</span>
+        </button>
+        <div class="step-line"></div>
+        <button class="step-dot" title="Шаг 3 — Семантика и УТП"><span class="step-num">3</span></button>
+        <div class="step-line"></div>
+        <button class="step-dot" title="Шаг 4 — Заголовки"><span class="step-num">4</span></button>
+        <div class="step-line"></div>
+        <button class="step-dot" title="Шаг 5 — Тексты"><span class="step-num">5</span></button>
+        <div class="step-line"></div>
+        <button class="step-dot" title="Шаг 6 — Фото и визуал"><span class="step-num">6</span></button>
+        <div class="step-line"></div>
+        <button class="step-dot" title="Шаг 7 — Профиль и доверие"><span class="step-num">7</span></button>
+        <div class="step-line"></div>
+        <button class="step-dot" title="Шаг 8 — Запуск и продвижение"><span class="step-num">8</span></button>
+        <div class="step-line"></div>
+        <button class="step-dot" title="Шаг 9 — Контроль статистики"><span class="step-num">9</span></button>
+        <div class="step-line"></div>
+        <button class="step-dot" title="Шаг 10 — Оптимизация"><span class="step-num">10</span></button>
       </div>
     </div>
 
