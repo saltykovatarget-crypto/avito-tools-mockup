@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Биллинг — AI Авитолог PRO (мокап)</title>
+<style>
+  [data-theme="dark"] {
+    --bg: #0E1118; --bg-gradient-top: rgba(111, 66, 193, 0.06);
+    --card: #141926; --card-hover: #1a2030; --input-bg: #0c0f15;
+    --text: #FFFFFF; --muted: #8A90A8;
+    --border: rgba(255, 255, 255, 0.08); --border-strong: rgba(255, 255, 255, 0.14);
+    --brand: #6F42C1; --brand-2: #9A7FE0; --brand-soft: rgba(111, 66, 193, 0.15);
+    --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+  }
+  [data-theme="light"] {
+    --bg: #f8fafc; --bg-gradient-top: rgba(111, 66, 193, 0.04);
+    --card: #ffffff; --card-hover: #fafbfc; --input-bg: #fafbfc;
+    --text: #0f172a; --muted: #64748b;
+    --border: #e2e8f0; --border-strong: #cbd5e1;
+    --brand: #6F42C1; --brand-2: #9A7FE0; --brand-soft: rgba(111, 66, 193, 0.08);
+    --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+  }
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh;background-image:radial-gradient(ellipse at top, var(--bg-gradient-top), transparent 60%)}
+  a{color:var(--brand-2);text-decoration:none}
+  button{font-family:inherit;cursor:pointer}
+
+  .layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+
+  /* Sidebar */
+  .sidebar{background:var(--card);border-right:1px solid var(--border);padding:18px 12px 16px;display:flex;flex-direction:column}
+  .logo-row{display:flex;align-items:center;gap:8px;padding:6px 12px 18px}
+  .logo-img{width:42px;height:42px;flex-shrink:0;object-fit:contain}
+  .logo-text{font-weight:700;font-size:15px;color:var(--text);line-height:1.1;white-space:nowrap;display:flex;align-items:center;gap:6px}
+  .pro-badge{font-size:10px;color:#fff;background:var(--brand);font-weight:700;letter-spacing:.5px;padding:3px 7px;border-radius:6px;line-height:1}
+  .btn-new-chat{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:11px 16px;font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px}
+  .btn-new-chat:hover{background:#5a36a3}
+  .nav-list{display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--text);font-weight:500;font-size:13px;transition:background .15s}
+  .nav-item:hover{background:var(--card-hover)}
+  .nav-item.active{background:var(--brand-soft);color:var(--brand-2)}
+  [data-theme="light"] .nav-item.active{color:var(--brand)}
+  .nav-ic{width:16px;height:16px;flex-shrink:0;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .nav-item .badge{margin-left:auto;background:var(--brand);color:#fff;font-size:10px;padding:2px 6px;border-radius:999px;font-weight:700}
+  .sidebar-bottom{margin-top:auto;padding-top:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:2px}
+
+  /* Main */
+  .main{padding:20px 28px 40px;max-width:1100px}
+  .page-header{margin-bottom:28px}
+  .page-title{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+  .page-title h1{margin:0;font-size:24px;font-weight:700;color:var(--text)}
+  .page-sub{color:var(--muted);margin:0;font-size:13px}
+
+  .section-title{
+    font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;
+    font-weight:700;margin:32px 0 14px;
+  }
+
+  /* Current subscription card */
+  .current-sub{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:24px 28px;margin-bottom:16px;position:relative;overflow:hidden;
+  }
+  .current-sub::after{
+    content:'';position:absolute;right:-50px;top:-50px;
+    width:200px;height:200px;border-radius:50%;
+    background:radial-gradient(circle, rgba(111,66,193,0.18), transparent 70%);
+    pointer-events:none;
+  }
+  .sub-row{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;position:relative;z-index:1;flex-wrap:wrap}
+  .sub-info{flex:1;min-width:240px}
+  .sub-plan-name{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .sub-plan-name h2{margin:0;font-size:22px;font-weight:700;color:var(--text)}
+  .sub-status{
+    font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+    background:rgba(16,185,129,0.18);color:#34d399;
+    padding:3px 8px;border-radius:5px;
+  }
+  .sub-meta{font-size:13px;color:var(--muted);margin-bottom:14px}
+  .sub-meta strong{color:var(--text)}
+  .sub-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .btn-outline{
+    background:transparent;color:var(--text);
+    border:1px solid var(--border-strong);border-radius:8px;
+    padding:10px 16px;font-weight:600;font-size:13px;
+    transition:border-color .15s,background .15s;
+  }
+  .btn-outline:hover{border-color:var(--brand);color:var(--brand-2)}
+  [data-theme="light"] .btn-outline:hover{color:var(--brand)}
+  .btn-danger{color:#fb7185;border-color:rgba(251,113,133,0.3)}
+  .btn-danger:hover{border-color:var(--red);color:var(--red)}
+
+  .sub-price{text-align:right;min-width:200px}
+  .sub-price-big{font-size:32px;font-weight:800;color:var(--text);line-height:1}
+  .sub-price-per{font-size:13px;color:var(--muted);margin-top:4px}
+  .sub-until{font-size:12px;color:var(--muted);margin-top:6px}
+
+  /* Usage grid */
+  .usage-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;position:relative;z-index:1}
+  .usage-item{
+    background:var(--input-bg);border:1px solid var(--border);
+    border-radius:10px;padding:14px 16px;
+  }
+  .usage-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:8px}
+  .usage-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+  .usage-current{font-size:20px;font-weight:700;color:var(--text)}
+  .usage-total{font-size:13px;color:var(--muted)}
+  .usage-bar{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden}
+  [data-theme="light"] .usage-bar{background:#e2e8f0}
+  .usage-bar-fill{height:100%;background:var(--brand);border-radius:3px}
+
+  /* Plans comparison */
+  .plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .plan-card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:14px;padding:24px 22px;display:flex;flex-direction:column;
+    position:relative;
+  }
+  .plan-card.popular{border-color:var(--brand)}
+  .plan-card.current{border:1px solid rgba(16,185,129,0.4)}
+  .plan-badge{
+    position:absolute;top:-10px;left:22px;
+    font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+    padding:4px 10px;border-radius:5px;
+  }
+  .plan-badge.popular{background:var(--brand);color:#fff}
+  .plan-badge.current{background:rgba(16,185,129,0.2);color:#34d399;border:1px solid rgba(16,185,129,0.4)}
+  .plan-name{font-size:18px;font-weight:700;color:var(--text);margin:0 0 4px}
+  .plan-tagline{font-size:12px;color:var(--muted);margin:0 0 16px}
+  .plan-price{display:flex;align-items:baseline;gap:4px;margin-bottom:18px}
+  .plan-price-big{font-size:28px;font-weight:800;color:var(--text);line-height:1}
+  .plan-price-per{font-size:12px;color:var(--muted)}
+  .plan-features{list-style:none;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:10px;flex:1}
+  .plan-feature{display:flex;gap:8px;align-items:flex-start;font-size:13px}
+  .plan-feature .check{
+    width:16px;height:16px;flex-shrink:0;margin-top:2px;
+    border-radius:5px;background:var(--brand-soft);color:var(--brand-2);
+    display:grid;place-items:center;
+  }
+  [data-theme="light"] .plan-feature .check{color:var(--brand)}
+  .plan-feature .check svg{width:10px;height:10px;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .plan-feature strong{color:var(--text);font-weight:600}
+  .plan-cta{
+    background:var(--brand);color:#fff;border:none;border-radius:10px;
+    padding:12px 18px;font-weight:700;font-size:13px;cursor:pointer;
+    transition:background .15s;
+  }
+  .plan-cta:hover{background:#5a36a3}
+  .plan-cta.outline{
+    background:transparent;color:var(--text);border:1px solid var(--border-strong);
+  }
+  .plan-cta.outline:hover{border-color:var(--brand);color:var(--brand-2)}
+  .plan-cta.disabled{background:transparent;color:var(--muted);border:1px solid var(--border);cursor:default}
+  .plan-cta.disabled:hover{background:transparent}
+
+  /* Period toggle */
+  .period-toggle{
+    display:flex;background:var(--card);border:1px solid var(--border);
+    border-radius:999px;padding:4px;margin-bottom:18px;width:fit-content;
+  }
+  .period-btn{
+    background:transparent;color:var(--muted);
+    border:none;padding:6px 16px;border-radius:999px;
+    font-weight:600;font-size:12px;cursor:pointer;transition:all .15s;
+  }
+  .period-btn.active{background:var(--brand);color:#fff}
+  .period-discount{font-size:10px;color:#34d399;font-weight:700;margin-left:4px}
+
+  /* Payments history */
+  .history-list{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:4px 20px}
+  .history-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:18px;padding:14px 0;border-bottom:1px solid var(--border)}
+  .history-row:last-child{border-bottom:none}
+  .history-title{font-weight:600;font-size:13px;color:var(--text)}
+  .history-meta{font-size:12px;color:var(--muted);margin-top:2px}
+  .history-amount{font-weight:700;font-size:14px;color:var(--text);min-width:90px;text-align:right}
+  .history-status{font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;background:rgba(16,185,129,0.15);color:#34d399}
+
+  .build-marker{position:fixed;bottom:8px;right:12px;font-size:10px;color:var(--muted);opacity:.5;font-family:monospace}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo-row">
+      <img class="logo-img" src="logo-header.png" alt="" />
+      <div class="logo-text">AI Авитолог<span class="pro-badge">PRO</span></div>
+    </div>
+    <button class="btn-new-chat">
+      <svg class="nav-ic" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Новый чат
+    </button>
+    <div class="nav-list">
+      <a class="nav-item" href="cabinet.html"><svg class="nav-ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+      <a class="nav-item" href="#"><svg class="nav-ic" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Чат AI<span class="badge">3</span></a>
+      <a class="nav-item" href="parser.html"><svg class="nav-ic" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Инструменты</a>
+    </div>
+    <div class="sidebar-bottom">
+      <a class="nav-item" href="#" id="theme-toggle"><svg class="nav-ic" id="theme-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span id="theme-label">Светлая тема</span></a>
+      <a class="nav-item active" href="billing.html"><svg class="nav-ic" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Биллинг</a>
+      <a class="nav-item" href="wallet.html"><svg class="nav-ic" viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>Кошелёк</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Биллинг и подписка</h1>
+      </div>
+      <p class="page-sub">Управление подпиской, изменение тарифа, история платежей.</p>
+    </div>
+
+    <!-- CURRENT SUBSCRIPTION -->
+    <div class="current-sub">
+      <div class="sub-row">
+        <div class="sub-info">
+          <div class="sub-plan-name">
+            <h2>Профессиональный</h2>
+            <span class="sub-status">Активен</span>
+          </div>
+          <p class="sub-meta">Следующее списание: <strong>28 июня 2026</strong> · автопродление включено</p>
+          <div class="sub-actions">
+            <button class="btn-outline">Изменить способ оплаты</button>
+            <button class="btn-outline btn-danger">Отменить подписку</button>
+          </div>
+        </div>
+        <div class="sub-price">
+          <div class="sub-price-big">4 290 ₽</div>
+          <div class="sub-price-per">в месяц</div>
+          <div class="sub-until">или 42 900 ₽/год — экономия 15%</div>
+        </div>
+      </div>
+
+      <div class="usage-grid">
+        <div class="usage-item">
+          <div class="usage-label">Запросы AI в этом периоде</div>
+          <div class="usage-row">
+            <span class="usage-current">142</span>
+            <span class="usage-total">из 300 · сбросится через 12 дней</span>
+          </div>
+          <div class="usage-bar"><div class="usage-bar-fill" style="width:47%"></div></div>
+        </div>
+        <div class="usage-item">
+          <div class="usage-label">Прогоны парсера в этом периоде</div>
+          <div class="usage-row">
+            <span class="usage-current">2</span>
+            <span class="usage-total">из 5 · сбросится через 12 дней</span>
+          </div>
+          <div class="usage-bar"><div class="usage-bar-fill" style="width:40%;background:var(--green)"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLANS COMPARISON -->
+    <h3 class="section-title">Сменить тариф</h3>
+
+    <div class="period-toggle">
+      <button class="period-btn active">Помесячно</button>
+      <button class="period-btn">Год <span class="period-discount">−15%</span></button>
+    </div>
+
+    <div class="plans-grid">
+
+      <div class="plan-card">
+        <h3 class="plan-name">Базовый</h3>
+        <p class="plan-tagline">До 2 проектов · для тестирования ниши</p>
+        <div class="plan-price">
+          <span class="plan-price-big">1 590 ₽</span>
+          <span class="plan-price-per">/мес</span>
+        </div>
+        <ul class="plan-features">
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span><strong>100</strong> запросов AI в месяц</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span><strong>1</strong> прогон парсера в подарок</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>Все шаги методологии</span></li>
+        </ul>
+        <button class="plan-cta outline">Перейти на Базовый</button>
+      </div>
+
+      <div class="plan-card current">
+        <span class="plan-badge current">Текущий</span>
+        <h3 class="plan-name">Профессиональный</h3>
+        <p class="plan-tagline">До 6 проектов · авитолог / маркетолог</p>
+        <div class="plan-price">
+          <span class="plan-price-big">4 290 ₽</span>
+          <span class="plan-price-per">/мес</span>
+        </div>
+        <ul class="plan-features">
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span><strong>300</strong> запросов AI в месяц</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span><strong>5</strong> прогонов парсера в подарок</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>Все шаги методологии</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>Приоритетная поддержка</span></li>
+        </ul>
+        <button class="plan-cta disabled">Активен</button>
+      </div>
+
+      <div class="plan-card popular">
+        <span class="plan-badge popular">Лучшая цена</span>
+        <h3 class="plan-name">Агентский</h3>
+        <p class="plan-tagline">До 15 проектов · агентство / команда</p>
+        <div class="plan-price">
+          <span class="plan-price-big">9 990 ₽</span>
+          <span class="plan-price-per">/мес</span>
+        </div>
+        <ul class="plan-features">
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span><strong>750</strong> запросов AI в месяц</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span><strong>15</strong> прогонов парсера в подарок</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>Все шаги методологии</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>Приоритетная поддержка</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>Несколько пользователей <em style="color:var(--muted);font-style:normal">(R3)</em></span></li>
+        </ul>
+        <button class="plan-cta">Поднять до Агентского</button>
+      </div>
+
+    </div>
+
+    <!-- PAYMENTS HISTORY -->
+    <h3 class="section-title">История платежей</h3>
+    <div class="history-list">
+      <div class="history-row">
+        <div>
+          <div class="history-title">Подписка «Профессиональный» — 1 мес</div>
+          <div class="history-meta">28 мая 2026 · Visa **6411</div>
+        </div>
+        <div class="history-amount">4 290 ₽</div>
+        <span class="history-status">Оплачено</span>
+      </div>
+      <div class="history-row">
+        <div>
+          <div class="history-title">Пакет 5 прогонов парсера</div>
+          <div class="history-meta">15 мая 2026 · Visa **6411</div>
+        </div>
+        <div class="history-amount">790 ₽</div>
+        <span class="history-status">Оплачено</span>
+      </div>
+      <div class="history-row">
+        <div>
+          <div class="history-title">Подписка «Профессиональный» — 1 мес</div>
+          <div class="history-meta">28 апреля 2026 · Visa **6411</div>
+        </div>
+        <div class="history-amount">4 290 ₽</div>
+        <span class="history-status">Оплачено</span>
+      </div>
+      <div class="history-row">
+        <div>
+          <div class="history-title">Подписка «Базовый» — 1 мес</div>
+          <div class="history-meta">28 марта 2026 · Visa **6411</div>
+        </div>
+        <div class="history-amount">1 590 ₽</div>
+        <span class="history-status">Оплачено</span>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const html=document.documentElement;
+  const toggle=document.getElementById('theme-toggle');
+  const label=document.getElementById('theme-label');
+  const icon=document.getElementById('theme-icon');
+  const moonPath='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  const sunPath='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  toggle.addEventListener('click',e=>{
+    e.preventDefault();
+    const isDark=html.getAttribute('data-theme')==='dark';
+    html.setAttribute('data-theme',isDark?'light':'dark');
+    label.textContent=isDark?'Тёмная тема':'Светлая тема';
+    icon.innerHTML=isDark?sunPath:moonPath;
+  });
+</script>
+<div class="build-marker">мокап биллинга R1 · 2026-05-28</div>
+</body>
+</html>
