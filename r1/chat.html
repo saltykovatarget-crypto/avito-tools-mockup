@@ -256,14 +256,15 @@
   .parser-pill-arrow{width:14px;height:14px;color:var(--muted);flex-shrink:0}
 
   /* Result state */
-  .result-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+  .result-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
   .result-kpi{
     background:var(--input-bg);border:1px solid var(--border);
     border-radius:8px;padding:10px;text-align:center;
   }
-  .result-kpi-val{font-size:18px;font-weight:800;color:var(--text);line-height:1}
+  .result-kpi-val{font-size:16px;font-weight:800;color:var(--text);line-height:1}
   .result-kpi-val .unit{font-size:10px;color:var(--muted);font-weight:500}
-  .result-kpi-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px;font-weight:600}
+  .result-kpi-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:4px;font-weight:600}
+  .result-kpi-sub{font-size:9px;color:var(--muted);margin-top:2px;opacity:.8}
 
   .result-top-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin:0 0 8px}
   .result-photos{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin:0 -2px;scrollbar-width:thin}
@@ -566,12 +567,19 @@
                   <div class="result-kpi-lbl">аккаунтов</div>
                 </div>
                 <div class="result-kpi">
-                  <div class="result-kpi-val">78<span class="unit">%</span></div>
-                  <div class="result-kpi-lbl">с VAS</div>
-                </div>
-                <div class="result-kpi">
                   <div class="result-kpi-val">48 900<span class="unit">₽</span></div>
                   <div class="result-kpi-lbl">медиана</div>
+                  <div class="result-kpi-sub">от 28 000 до 89 000</div>
+                </div>
+                <div class="result-kpi">
+                  <div class="result-kpi-val">12 384</div>
+                  <div class="result-kpi-lbl">просмотров сегодня</div>
+                  <div class="result-kpi-sub">суммарно по нише</div>
+                </div>
+                <div class="result-kpi">
+                  <div class="result-kpi-val">73<span class="unit">%</span></div>
+                  <div class="result-kpi-lbl">доля топ-5</div>
+                  <div class="result-kpi-sub">по просмотрам</div>
                 </div>
               </div>
 
