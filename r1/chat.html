@@ -188,6 +188,34 @@
   }
   .btn-cancel:hover{color:var(--red);border-color:var(--red)}
 
+  /* ParserPill — компактный прогресс в чате */
+  .parser-pill{
+    display:flex;align-items:center;gap:12px;
+    background:var(--card);border:1px solid var(--border);
+    border-left:3px solid var(--amber);
+    border-radius:10px;padding:10px 14px;
+    color:var(--text);width:100%;max-width:560px;
+    transition:border-color .15s,transform .15s;cursor:pointer;
+  }
+  .parser-pill:hover{border-color:var(--brand);transform:translateY(-1px)}
+  .parser-pill-icon{
+    width:24px;height:24px;border-radius:6px;
+    background:rgba(245,158,11,0.18);
+    display:grid;place-items:center;flex-shrink:0;
+  }
+  .parser-pill-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .parser-pill-text strong{font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .parser-pill-text span{font-size:11px;color:var(--muted)}
+  .parser-pill-progress{
+    width:80px;height:4px;background:var(--input-bg);
+    border-radius:2px;overflow:hidden;flex-shrink:0;
+  }
+  .parser-pill-progress-bar{
+    height:100%;background:var(--amber);width:58%;
+    border-radius:2px;
+  }
+  .parser-pill-arrow{width:14px;height:14px;color:var(--muted);flex-shrink:0}
+
   /* Result state */
   .result-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
   .result-kpi{
@@ -411,60 +439,29 @@
       </div>
 
       <!-- ============ Разделитель: то же сообщение, состояние 2: ПРОГРЕСС ============ -->
-      <div class="state-divider"><span>↓ через ~30 секунд карточка превращается ↓</span></div>
+      <div class="state-divider"><span>↓ парсер запущен — карточка сворачивается в тонкую пилюлю ↓</span></div>
 
       <div class="msg-row">
         <div class="msg-avatar ai">AI</div>
         <div class="msg-content">
           <div class="msg-bubble">
-            <p>Парсер запущен. Я отслеживаю прогресс — пиши пока другие вопросы, отвечу.</p>
+            <p>Парсер запущен. Я отслеживаю прогресс — пиши пока другие вопросы, отвечу. Уведомлю в Telegram когда готово.</p>
           </div>
 
-          <!-- ============ ParserCard — состояние 2: ПРОГРЕСС ============ -->
-          <div class="parser-card">
-            <div class="parser-card-header">
-              <div class="parser-card-icon">
-                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              </div>
-              <div>
-                <div class="parser-card-title">Парсер работает — ворота гаражные · Москва</div>
-                <div class="parser-card-sub">Идёт 11 минут · осталось ~9 минут</div>
-              </div>
+          <!-- ============ ParserCard — состояние 2: ПРОГРЕСС (компактная пилюля) ============ -->
+          <a href="parser-report.html" class="parser-pill" style="text-decoration:none">
+            <div class="parser-pill-icon">
+              <div class="progress-pulse"></div>
             </div>
-
-            <div class="parser-card-body">
-              <div class="progress-list">
-                <div class="progress-step">
-                  <div class="progress-icon done"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-                  <span>Загружена выдача — 156 объявлений</span>
-                  <span class="progress-detail">11с</span>
-                </div>
-                <div class="progress-step">
-                  <div class="progress-icon active"><div class="progress-pulse"></div></div>
-                  <span>Парсинг деталей объявлений</span>
-                  <span class="progress-detail">87 / 156</span>
-                </div>
-                <div class="progress-step pending">
-                  <div class="progress-icon pending">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
-                  </div>
-                  <span>Сбор данных продавцов</span>
-                </div>
-                <div class="progress-step pending">
-                  <div class="progress-icon pending">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
-                  </div>
-                  <span>AI-разбор результата</span>
-                </div>
-              </div>
-              <div class="progress-bar-wrap"><div class="progress-bar-fill"></div></div>
+            <div class="parser-pill-text">
+              <strong>Парсер: «ворота гаражные · Москва»</strong>
+              <span>87 / 156 · осталось ~9 мин</span>
             </div>
-
-            <div class="parser-card-footer">
-              <div class="parser-price-sub" style="margin-top:0">Уведомлю в Telegram когда готово</div>
-              <button class="btn-cancel">Остановить</button>
+            <div class="parser-pill-progress">
+              <div class="parser-pill-progress-bar"></div>
             </div>
-          </div>
+            <svg class="parser-pill-arrow" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
 
           <span class="msg-time">14:14</span>
         </div>
