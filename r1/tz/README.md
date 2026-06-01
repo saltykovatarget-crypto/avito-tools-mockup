@@ -31,7 +31,7 @@
 | 3 | [02_wallet_backend_final.md](02_wallet_backend_final.md) | **🆕 Бэк кошелька** — миграции БД, сервис, API, Точка Банк | Бэк |
 | 4 | [03_backend_deep_dive.md](03_backend_deep_dive.md) | Production-углы: race conditions, observability, security, testing, ops | Бэк |
 | 5 | [07_FUTURE_AVITO_INTEGRATION.md](07_FUTURE_AVITO_INTEGRATION.md) | **🔮 Архитектура под будущую интеграцию с Авито-аккаунтами** | Бэк (заложить в MVP) |
-| 6 | [04_partners_program.md](04_partners_program.md) | ⚠️ Партнёрская программа (адаптация под wallet требуется) | Бэк (позже) |
+| 6 | [04_partners_program.md](04_partners_program.md) | ✅ **Партнёрка под wallet** — 30% разовый бонус, простая логика (~3-4 дня) | Бэк (позже) |
 | 7 | [05_frontend_wallet_components.md](05_frontend_wallet_components.md) | **🆕 Фронт-компоненты** для wallet UI | Лера + AI |
 
 📁 [archive/](archive/) — **устаревшие документы** (модель с подписками, не использовать).
