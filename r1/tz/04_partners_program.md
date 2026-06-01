@@ -1,661 +1,476 @@
-# ТЗ: Партнёрская программа AI Авитолог PRO
+# ТЗ: Партнёрская программа — 30% разовый бонус
 
-**Дата:** 2026-05-29
-**Автор:** Валерия Салтыкова (через AI-ассистента)
-**Получатель:** Иван (бэкенд + фронт интеграция)
-**Версия:** 1.0
-**Связанные документы:**
-- `ТЗ_парсер_интеграция.md` — основной модуль парсера
-- `ТЗ_дополнение_кабинет_и_кошелёк.md` — кабинет и кошелёк
-- `ТЗ_бэкенд_глубокое_расширение.md` — общая бэкенд-архитектура
+**Дата:** 2026-06-01
+**Версия:** 2.0 (адаптирована под wallet-модель)
+**Стек:** FastAPI + PostgreSQL + Telegram auth
 
 ---
 
-## 1. Цель
+## 🎯 Главное в одном абзаце
 
-Запустить tiered-партнёрку с пожизненными выплатами и автоматическим повышением уровня. Партнёр приводит платящих клиентов → получает % с каждого их платежа.
+Партнёр получает **30% от первого пополнения** каждого приведённого им клиента. **Один раз** на каждого реферала. Без tier'ов, без quota'ов, без cron'ов, без условий по объёму. Минимальный вывод 1 000 ₽.
 
-**Бизнес-задача:** партнёрский канал должен закрывать 20–30% новых платных подписок к концу первого года работы.
-
----
-
-## 2. Условия программы (зафиксированы)
-
-### 2.1 Tier-структура
-
-| Уровень | % с платежа | Условие повышения |
-|---|---|---|
-| **Старт** | 20% | от 1 платящего реферала |
-| **Эксперт** | 30% | от 10 активных платящих рефералов |
-| **Лидер** | 40% | от 30 активных платящих рефералов |
-
-**Активный реферал** = клиент, у которого **в текущем месяце был успешный платёж** по подписке (не возврат, не chargeback).
-
-**Понижение уровня:** если активных рефералов стало меньше → партнёр **остаётся на текущем уровне до конца месяца**, затем автоматически понижается при следующем cron-пересчёте (см. §6.4).
-
-### 2.2 Срок выплат
-
-**Lifetime** (пожизненно). Партнёр получает % с каждого платежа реферала, пока реферал активен. Без cap по сроку, без cap по сумме.
-
-### 2.3 Атрибуция
-
-- **Cookie-based** + **server-side fallback** (см. §4)
-- **Срок жизни cookie:** 90 дней (last-click attribution)
-- **Окно конверсии:** регистрация в течение 90 дней с клика → реферал засчитывается партнёру
-
-### 2.4 Что НЕ начисляется
-
-- Возвраты (refund) — % списывается с баланса партнёра
-- Chargeback — аналогично списание
-- Тестовые / промо платежи (с пометкой `is_test=true`)
-- Если реферал = сам партнёр (self-referral)
-
-### 2.5 Выплаты партнёру
-
-- **Минимум для вывода:** 1 000 ₽
-- **Способы:** перевод на карту / СБП по номеру телефона / на криптокошелёк USDT (TRC-20)
-- **Срок выплаты:** до 7 рабочих дней после заявки
-- **Налоги:** партнёр самозанятый или ИП → подаёт чек/УПД сам, мы перечисляем валовую сумму
+Это **самая простая партнёрская модель** — реализация ~3–4 дня бэка вместо ~10 дней с tier-моделью.
 
 ---
 
-## 3. Архитектура (общая)
+## 📐 Условия
 
-```
-┌─────────────────────────────────────────────────┐
-│  Landing /partners-section (готов)              │
-│  ↓ CTA «Стать партнёром»                        │
-├─────────────────────────────────────────────────┤
-│  Application form (TODO)                        │
-│  ↓ создаём partner_profile (status=pending)     │
-├─────────────────────────────────────────────────┤
-│  Admin moderation (TODO)                        │
-│  ↓ approve → status=active, генерим ref_code    │
-├─────────────────────────────────────────────────┤
-│  Partner cabinet /partners/dashboard (TODO)     │
-│  • Реф. ссылка, QR, промо-материалы             │
-│  • Статистика: клики, регистрации, активные     │
-│  • Текущий tier, доход, баланс                  │
-│  • Заявки на вывод                              │
-└─────────────────────────────────────────────────┘
+| Параметр | Значение |
+|---|---|
+| **Тип** | Single payout (разовая выплата) |
+| **% комиссии** | **30%** |
+| **Базис** | Первое пополнение реферала (любое — package или regular) |
+| **Срок** | Без срока (атрибуция бессрочная) |
+| **Окно атрибуции по клику** | 90 дней (cookie-based) |
+| **Минимум для вывода** | 1 000 ₽ |
+| **Способы вывода** | Карта / СБП / USDT TRC-20 |
+| **Срок выплаты** | До 7 рабочих дней (после approve админом) |
+
+**Примеры:**
+- Реферал положил 100 ₽ → партнёру **30 ₽**
+- Реферал положил 390 ₽ (пакет) → партнёру **117 ₽**
+- Реферал положил 990 ₽ (пакет) → партнёру **297 ₽**
+- Реферал положил 1 490 ₽ (пакет) → партнёру **447 ₽**
+
+---
+
+## 🚫 Чего НЕТ в модели
+
+❌ Tier'ы (Старт / Эксперт / Лидер)
+❌ Quota активных рефералов
+❌ Cron пересчёта уровня партнёра
+❌ Recurring выплаты (lifetime % с каждого платежа)
+❌ Промокоды клиенту
+❌ Подпартнёры (MLM)
+❌ Лидерборды
+
+Если что-то из этого захотим — добавим **позже** (легко расширить).
+
+---
+
+## 🗃 Схема БД
+
+### Миграция 1 — Поля в `users`
+
+```python
+op.add_column('users',
+    sa.Column('referred_by_partner_id', sa.BigInteger(),
+              sa.ForeignKey('partner_profile.id'), nullable=True))
+op.add_column('users',
+    sa.Column('partner_commission_paid', sa.Boolean(),
+              nullable=False, server_default='false'))
+op.create_index('idx_users_referred_by_partner',
+                'users', ['referred_by_partner_id'])
 ```
 
+`partner_commission_paid` = `true` после того как комиссия начислена партнёру. **Защита от двойной выплаты**.
+
+### Миграция 2 — Таблица `partner_profile`
+
+```python
+op.create_table('partner_profile',
+    sa.Column('id', sa.BigInteger(), primary_key=True),
+    sa.Column('user_id', sa.Integer(), sa.ForeignKey('users.id'),
+              nullable=False, unique=True),
+    sa.Column('ref_code', sa.String(16), nullable=False, unique=True),
+    sa.Column('status', sa.String(20), nullable=False,
+              server_default='pending'),  # pending / active / banned
+    sa.Column('payout_method', sa.String(20)),  # card / sbp / usdt_trc20
+    sa.Column('payout_details', sa.JSON()),  # {phone, card_last4, wallet_address...}
+    # Денормализованные счётчики (обновляем при коммиссии)
+    sa.Column('total_referrals_count', sa.Integer(),
+              nullable=False, server_default='0'),
+    sa.Column('paid_referrals_count', sa.Integer(),
+              nullable=False, server_default='0'),
+    sa.Column('total_earned_kopecks', sa.BigInteger(),
+              nullable=False, server_default='0'),
+    sa.Column('total_paid_out_kopecks', sa.BigInteger(),
+              nullable=False, server_default='0'),
+    sa.Column('available_balance_kopecks', sa.BigInteger(),
+              nullable=False, server_default='0'),
+    sa.Column('applied_at', sa.TIMESTAMP(), server_default=sa.func.now()),
+    sa.Column('approved_at', sa.TIMESTAMP()),
+    sa.Column('approved_by', sa.Integer(), sa.ForeignKey('users.id')),
+)
+op.create_index('idx_partner_profile_status', 'partner_profile', ['status'])
+op.create_index('idx_partner_profile_ref_code', 'partner_profile', ['ref_code'])
+```
+
+### Миграция 3 — Таблица `partner_commission`
+
+```python
+op.create_table('partner_commission',
+    sa.Column('id', sa.BigInteger(), primary_key=True),
+    sa.Column('partner_id', sa.BigInteger(),
+              sa.ForeignKey('partner_profile.id'), nullable=False),
+    sa.Column('referred_user_id', sa.Integer(),
+              sa.ForeignKey('users.id'), nullable=False),
+    sa.Column('source_payment_id', sa.Integer(),
+              sa.ForeignKey('payments.id'), nullable=False),
+    sa.Column('source_wallet_tx_id', sa.BigInteger(),
+              sa.ForeignKey('wallet_transactions.id'), nullable=False),
+    sa.Column('referral_topup_kopecks', sa.BigInteger(), nullable=False),
+    sa.Column('commission_kopecks', sa.BigInteger(), nullable=False),  # 30% от topup
+    sa.Column('status', sa.String(20), nullable=False,
+              server_default='accrued'),  # accrued / paid / reversed
+    sa.Column('reversed_reason', sa.String(255)),
+    sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.func.now()),
+)
+op.create_index('idx_partner_commission_partner_id',
+                'partner_commission', ['partner_id', 'created_at'])
+op.create_index('idx_partner_commission_referred_user',
+                'partner_commission', ['referred_user_id'])
+```
+
+### Миграция 4 — Таблица `partner_payout` (заявки на вывод)
+
+```python
+op.create_table('partner_payout',
+    sa.Column('id', sa.BigInteger(), primary_key=True),
+    sa.Column('partner_id', sa.BigInteger(),
+              sa.ForeignKey('partner_profile.id'), nullable=False),
+    sa.Column('amount_kopecks', sa.BigInteger(), nullable=False),
+    sa.Column('method', sa.String(20), nullable=False),
+    sa.Column('destination', sa.JSON(), nullable=False),
+    sa.Column('status', sa.String(20), nullable=False,
+              server_default='requested'),  # requested / approved / paid / rejected
+    sa.Column('reject_reason', sa.String(255)),
+    sa.Column('external_tx_id', sa.String(200)),
+    sa.Column('processed_by', sa.Integer(), sa.ForeignKey('users.id')),
+    sa.Column('requested_at', sa.TIMESTAMP(), server_default=sa.func.now()),
+    sa.Column('processed_at', sa.TIMESTAMP()),
+)
+op.create_index('idx_partner_payout_partner_id',
+                'partner_payout', ['partner_id', 'requested_at'])
+op.create_index('idx_partner_payout_status', 'partner_payout', ['status'])
+```
+
+### Миграция 5 — Таблица `partner_click` (для аналитики, опционально)
+
+```python
+op.create_table('partner_click',
+    sa.Column('id', sa.BigInteger(), primary_key=True),
+    sa.Column('partner_id', sa.BigInteger(),
+              sa.ForeignKey('partner_profile.id'), nullable=False),
+    sa.Column('ref_code', sa.String(16), nullable=False),
+    sa.Column('ip_address', sa.String(45)),
+    sa.Column('user_agent', sa.Text()),
+    sa.Column('referrer', sa.Text()),
+    sa.Column('utm_source', sa.String(100)),
+    sa.Column('utm_medium', sa.String(100)),
+    sa.Column('utm_campaign', sa.String(100)),
+    sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.func.now()),
+)
+op.create_index('idx_partner_click_partner_id',
+                'partner_click', ['partner_id', 'created_at'])
+```
+
+Опционально — но полезно для статистики Click → Registration → First Payment.
+
 ---
 
-## 4. Tracking рефералов (как отслеживать)
+## 🔗 Tracking реферала
 
-### 4.1 Реферальная ссылка
+### 1. Клик по реф-ссылке
 
 Формат: `https://aiavitologpro.ru/?ref=<code>`
 
-Где `<code>` — короткий уникальный код, 6–8 символов алфавит+цифры (base62), генерируется при approve партнёра.
+`ref_code` — 6–8 символов base62, уникальный на партнёра.
 
-Примеры:
-- `aiavitologpro.ru/?ref=lera2026`
-- `aiavitologpro.ru/?ref=k3mF9pZ`
-
-**Альтернативная форма** (опционально позже): `aiavitologpro.ru/r/<code>` — для красивого вида в постах.
-
-### 4.2 Cookie + server-side трекинг
-
-Когда пользователь заходит по реф-ссылке:
-
-**Frontend (Landing):**
+**На фронте** (Landing):
 ```ts
-// На любой странице с ?ref=<code>:
-const params = new URLSearchParams(window.location.search);
-const refCode = params.get('ref');
-
+// При заходе на любую страницу:
+const refCode = new URLSearchParams(window.location.search).get('ref');
 if (refCode) {
-  // 1. Сохранить в cookie (90 дней, SameSite=Lax)
   document.cookie = `ref_code=${refCode}; max-age=${90*24*3600}; path=/; SameSite=Lax`;
-
-  // 2. Отправить click-event в API (для статистики)
+  // Отправка click-event для статистики (опционально):
   fetch('/api/partners/track-click', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      ref_code: refCode,
-      referrer: document.referrer,
-      user_agent: navigator.userAgent,
-      utm_source: params.get('utm_source'),
-      utm_medium: params.get('utm_medium'),
-      utm_campaign: params.get('utm_campaign'),
-    }),
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ ref_code: refCode, referrer: document.referrer }),
   });
-
-  // 3. Убрать ref из URL (clean URL)
-  params.delete('ref');
-  const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-  window.history.replaceState({}, '', newUrl);
+  // Чистим URL:
+  const url = new URL(window.location.href);
+  url.searchParams.delete('ref');
+  window.history.replaceState({}, '', url.toString());
 }
 ```
 
-**Backend (на регистрации):**
+### 2. Регистрация юзера
 
-При создании User → если в cookie есть `ref_code`:
-1. Найти `partner_profile` по `ref_code`
-2. Проверить:
-   - партнёр активен (`status=active`)
-   - не self-referral (`partner.user_id !== new_user.id`)
-   - реферал ещё не привязан к другому партнёру
-   - регистрация в окне 90 дней с клика
-3. Создать запись `referral` со связкой `partner_id ↔ referred_user_id`
-4. Очистить cookie `ref_code`
-
-### 4.3 Edge cases
-
-- **Пользователь сменил девайс / куки сбросил** → реф-связка не пройдёт. Это приемлемая потеря (≈10–15% по индустрии).
-- **Несколько ref-кликов подряд от разных партнёров** → last-click wins, перезаписываем cookie.
-- **Уже зарегистрированный пользователь зашёл по ref** → не привязываем, ref игнорируется (только новые регистрации).
-- **Реферал зарегистрировался, но не оплатил** → засчитывается как «лид», но не как «активный». Платёж — триггер начисления.
-
----
-
-## 5. Схема БД
-
-```sql
--- Партнёр (расширение profile или отдельная таблица)
-CREATE TABLE partner_profile (
-  id BIGSERIAL PRIMARY KEY,
-  user_id BIGINT NOT NULL UNIQUE REFERENCES users(id),
-  ref_code VARCHAR(16) NOT NULL UNIQUE,
-  status VARCHAR(20) NOT NULL DEFAULT 'pending', -- pending / active / banned
-  tier VARCHAR(20) NOT NULL DEFAULT 'starter',   -- starter / expert / leader
-  payout_method VARCHAR(20),                     -- card / sbp / usdt_trc20
-  payout_details JSONB,                          -- {phone, card_number_masked, wallet_address, ...}
-  applied_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  approved_at TIMESTAMP,
-  approved_by BIGINT REFERENCES users(id),
-  metadata JSONB DEFAULT '{}'::jsonb,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_partner_profile_status ON partner_profile(status);
-CREATE INDEX idx_partner_profile_tier ON partner_profile(tier);
-
--- Клики по реферальной ссылке (для аналитики)
-CREATE TABLE partner_click (
-  id BIGSERIAL PRIMARY KEY,
-  partner_id BIGINT NOT NULL REFERENCES partner_profile(id),
-  ref_code VARCHAR(16) NOT NULL,
-  ip_address INET,
-  user_agent TEXT,
-  referrer TEXT,
-  utm_source VARCHAR(100),
-  utm_medium VARCHAR(100),
-  utm_campaign VARCHAR(100),
-  fingerprint VARCHAR(64),  -- для дедупликации (опционально)
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_partner_click_partner_id ON partner_click(partner_id);
-CREATE INDEX idx_partner_click_created_at ON partner_click(created_at);
-
--- Реферальные связки
-CREATE TABLE referral (
-  id BIGSERIAL PRIMARY KEY,
-  partner_id BIGINT NOT NULL REFERENCES partner_profile(id),
-  referred_user_id BIGINT NOT NULL UNIQUE REFERENCES users(id),
-  ref_code VARCHAR(16) NOT NULL,
-  click_id BIGINT REFERENCES partner_click(id),
-  status VARCHAR(20) NOT NULL DEFAULT 'registered', -- registered / paying / churned / banned
-  first_payment_at TIMESTAMP,
-  last_payment_at TIMESTAMP,
-  total_earned BIGINT NOT NULL DEFAULT 0, -- всего начислено партнёру в копейках
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_referral_partner_id ON referral(partner_id);
-CREATE INDEX idx_referral_status ON referral(status);
-
--- Начисления партнёру (одна запись на каждый платёж реферала)
-CREATE TABLE partner_commission (
-  id BIGSERIAL PRIMARY KEY,
-  partner_id BIGINT NOT NULL REFERENCES partner_profile(id),
-  referral_id BIGINT NOT NULL REFERENCES referral(id),
-  payment_id BIGINT NOT NULL REFERENCES payments(id),   -- исходный платёж реферала
-  tier_at_time VARCHAR(20) NOT NULL,                    -- какой tier был на момент начисления
-  percent_at_time INTEGER NOT NULL,                     -- 20 / 30 / 40
-  payment_amount_kopecks BIGINT NOT NULL,               -- сумма платежа реферала
-  commission_amount_kopecks BIGINT NOT NULL,            -- начисление партнёру
-  status VARCHAR(20) NOT NULL DEFAULT 'accrued',        -- accrued / paid / reversed
-  reversed_reason TEXT,
-  reversed_at TIMESTAMP,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_partner_commission_partner_id ON partner_commission(partner_id);
-CREATE INDEX idx_partner_commission_status ON partner_commission(status);
-CREATE INDEX idx_partner_commission_referral_id ON partner_commission(referral_id);
-
--- Заявки на вывод
-CREATE TABLE partner_payout (
-  id BIGSERIAL PRIMARY KEY,
-  partner_id BIGINT NOT NULL REFERENCES partner_profile(id),
-  amount_kopecks BIGINT NOT NULL,
-  method VARCHAR(20) NOT NULL,                          -- card / sbp / usdt_trc20
-  destination JSONB NOT NULL,                           -- куда отправлять (карта/телефон/wallet)
-  status VARCHAR(20) NOT NULL DEFAULT 'requested',      -- requested / approved / paid / rejected / cancelled
-  reject_reason TEXT,
-  processed_by BIGINT REFERENCES users(id),
-  requested_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  processed_at TIMESTAMP,
-  external_tx_id VARCHAR(200)                           -- ID транзакции в платёжной системе
-);
-
-CREATE INDEX idx_partner_payout_partner_id ON partner_payout(partner_id);
-CREATE INDEX idx_partner_payout_status ON partner_payout(status);
-```
-
----
-
-## 6. Бизнес-логика
-
-### 6.1 Создание партнёра
-
-1. Пользователь жмёт «Стать партнёром» на лендинге → попадает на форму `/partners/apply`
-2. Форма (auth required — нужно сначала зарегистрироваться как обычный user):
-   - Имя / контакт (Telegram, email уже из профиля)
-   - Откуда узнал о нас
-   - Тип партнёра: авитолог / агентство / блогер / другое
-   - Аудитория (число подписчиков / клиентов)
-   - Реквизиты выплат (можно добавить позже)
-   - Согласие с офертой партнёра
-3. Создаётся запись `partner_profile(status='pending')`
-4. Уведомление админу (TG-бот / email)
-5. Админ approve / reject в админке
-6. При approve:
-   - Генерируем `ref_code` (6–8 chars base62, unique check)
-   - Меняем status=active
-   - Отправляем письмо партнёру с инструкцией + ссылкой
-7. При reject: уведомление партнёру с причиной
-
-### 6.2 Привязка реферала (на регистрации)
+При создании User проверяем cookie `ref_code`:
 
 ```python
-# psevdokod в auth router
 def register_user(request, payload):
-    user = create_user(payload)
-
-    # Check referral
+    user = create_user(payload)  # обычная регистрация
+    
+    # Привязка реферала
     ref_code = request.cookies.get('ref_code')
     if ref_code:
-        partner = get_partner_by_ref_code(ref_code)
-        if partner and partner.status == 'active' and partner.user_id != user.id:
-            # Проверка окна 90 дней
-            last_click = get_last_click(partner.id, fingerprint=get_fingerprint(request))
-            if last_click and (now() - last_click.created_at).days <= 90:
-                create_referral(
-                    partner_id=partner.id,
-                    referred_user_id=user.id,
-                    ref_code=ref_code,
-                    click_id=last_click.id,
-                    status='registered',
-                )
-
+        partner = db.query(PartnerProfile).filter_by(
+            ref_code=ref_code, status='active'
+        ).first()
+        if partner and partner.user_id != user.id:  # not self-referral
+            user.referred_by_partner_id = partner.id
+            user.partner_commission_paid = False
+            db.commit()
+    
     return user
 ```
 
-### 6.3 Начисление на платеже
+**Edge cases:**
+- ref_code невалидный → игнорируем
+- self-referral → игнорируем (партнёр сам себе реферал)
+- partner.status != 'active' → игнорируем
 
-В webhook обработчике успешного платежа:
+### 3. Списание комиссии (САМОЕ ВАЖНОЕ)
+
+При успешном пополнении в webhook'е Точки:
 
 ```python
-def on_payment_success(payment):
-    referral = get_referral_by_user_id(payment.user_id)
-    if not referral or referral.status == 'banned':
+def on_topup_success(user_id: int, payment_amount_kopecks: int,
+                    wallet_tx_id: int, payment_id: int):
+    """Вызывается из webhook handler'а после успешного пополнения."""
+    
+    user = db.query(User).filter_by(id=user_id).first()
+    
+    # 1. Партнёр привязан?
+    if not user.referred_by_partner_id:
         return
-
-    partner = get_partner(referral.partner_id)
-    if partner.status != 'active':
+    
+    # 2. Комиссия за этого реферала уже выплачена?
+    if user.partner_commission_paid:
+        return  # это не первое пополнение, не выплачиваем
+    
+    # 3. Партнёр активный?
+    partner = db.query(PartnerProfile).filter_by(
+        id=user.referred_by_partner_id
+    ).with_for_update().first()
+    if not partner or partner.status != 'active':
         return
-
-    # Текущий tier партнёра (на момент платежа)
-    tier = partner.tier
-    percent = TIER_PERCENT[tier]  # {'starter': 20, 'expert': 30, 'leader': 40}
-
-    commission_amount = payment.amount * percent // 100
-
-    create_partner_commission(
+    
+    # 4. Расчёт комиссии
+    commission = payment_amount_kopecks * 30 // 100  # 30%
+    
+    # 5. Создание записи + обновление баланса (атомарно, в одной транзакции)
+    db.add(PartnerCommission(
         partner_id=partner.id,
-        referral_id=referral.id,
-        payment_id=payment.id,
-        tier_at_time=tier,
-        percent_at_time=percent,
-        payment_amount_kopecks=payment.amount,
-        commission_amount_kopecks=commission_amount,
+        referred_user_id=user.id,
+        source_payment_id=payment_id,
+        source_wallet_tx_id=wallet_tx_id,
+        referral_topup_kopecks=payment_amount_kopecks,
+        commission_kopecks=commission,
         status='accrued',
-    )
-
-    # Обновить статистику реферала
-    if not referral.first_payment_at:
-        referral.first_payment_at = now()
-    referral.last_payment_at = now()
-    referral.total_earned += commission_amount
-    referral.status = 'paying'
-    save(referral)
+    ))
+    
+    partner.paid_referrals_count += 1
+    partner.total_earned_kopecks += commission
+    partner.available_balance_kopecks += commission
+    
+    user.partner_commission_paid = True
+    
+    db.commit()
+    
+    # 6. Уведомление партнёру (TG / email)
+    notify_partner_new_commission(partner, commission, user_id_masked)
 ```
 
-### 6.4 Cron: пересчёт tier'ов
+**Гарантии:**
+- Idempotency через флаг `partner_commission_paid` на User
+- Атомарность через `with_for_update`
+- Если webhook прилетит дважды — второй вызов увидит флаг `true` и пропустит
 
-Раз в день (например в 02:00 МСК) запускаем job:
+### 4. Возврат комиссии при refund
 
-```python
-def recalculate_tiers():
-    for partner in get_all_active_partners():
-        active_count = count_active_referrals(
-            partner_id=partner.id,
-            window_days=30,  # активные = были платежи в последние 30 дней
-        )
-
-        new_tier = compute_tier(active_count)
-        if new_tier != partner.tier:
-            old_tier = partner.tier
-            partner.tier = new_tier
-            save(partner)
-            notify_partner_tier_change(partner, old_tier, new_tier)
-
-def compute_tier(active_count: int) -> str:
-    if active_count >= 30:
-        return 'leader'    # 40%
-    if active_count >= 10:
-        return 'expert'    # 30%
-    return 'starter'       # 20%
-```
-
-### 6.5 Обработка возвратов / chargeback
+Если реферал попросил возврат через поддержку:
 
 ```python
-def on_payment_refund(payment, reason):
-    commission = get_commission_by_payment_id(payment.id)
-    if not commission or commission.status != 'accrued':
+def on_refund(payment_id: int, reason: str):
+    commission = db.query(PartnerCommission).filter_by(
+        source_payment_id=payment_id, status='accrued'
+    ).first()
+    if not commission:
         return
-
-    # Reverse начисление
+    
+    partner = db.query(PartnerProfile).filter_by(
+        id=commission.partner_id
+    ).with_for_update().first()
+    
     commission.status = 'reversed'
     commission.reversed_reason = reason
-    commission.reversed_at = now()
-    save(commission)
-
-    # Списываем с баланса партнёра (если ещё не выплачено)
-    if partner_balance(commission.partner_id) >= commission.commission_amount_kopecks:
-        decrease_balance(commission.partner_id, commission.commission_amount_kopecks)
-    else:
-        # Записываем в долг — учтём при следующих начислениях
-        create_debt_record(commission.partner_id, commission.commission_amount_kopecks)
-```
-
-### 6.6 Заявка на вывод
-
-```python
-def request_payout(partner, amount, method, destination):
-    if amount < 100_000:  # 1000 ₽ в копейках
-        raise BusinessError("Минимум для вывода — 1 000 ₽")
-
-    balance = compute_available_balance(partner.id)
-    if amount > balance:
-        raise BusinessError(f"Доступно к выводу: {format_rub(balance)}")
-
-    payout = create_partner_payout(
-        partner_id=partner.id,
-        amount_kopecks=amount,
-        method=method,
-        destination=destination,
-        status='requested',
-    )
-    notify_admin_new_payout(payout)
-    return payout
-
-def compute_available_balance(partner_id):
-    # Все accrued начисления
-    accrued = sum_commissions(partner_id, status='accrued')
-    # Минус reversed
-    reversed = sum_commissions(partner_id, status='reversed')
-    # Минус уже выплаченные / в обработке
-    paid_or_pending = sum_payouts(partner_id, status__in=['requested', 'approved', 'paid'])
-    return accrued - reversed - paid_or_pending
+    
+    # Откатываем балансы
+    partner.available_balance_kopecks -= commission.commission_kopecks
+    partner.total_earned_kopecks -= commission.commission_kopecks
+    # paid_referrals_count не трогаем — он показывает «всего было»
+    
+    # Если баланс ушёл в минус (партнёр уже вывел) — оставляем как долг
+    # При следующих коммиссиях вычтется
+    
+    db.commit()
 ```
 
 ---
 
-## 7. API endpoints
+## 🛣 API эндпоинты
 
-### Партнёрские (для cabinet)
+### Для партнёра
 
 ```
 POST   /api/partners/apply
-       body: { type, audience_size, source, comment }
+       Body: { type, audience_size, source, comment }
        → создание заявки, status=pending
 
 GET    /api/partners/me
-       → { id, ref_code, status, tier, balance, total_earned, ... }
+       → { ref_code, status, ref_link,
+           stats: { referrals_count, paid_count, total_earned_rub,
+                    available_balance_rub, total_paid_out_rub }}
 
-GET    /api/partners/me/referrals
-       query: ?status=&page=
-       → { items: [{ user_id_masked, registered_at, first_payment_at, total_earned, status }], total }
+GET    /api/partners/me/referrals?page=1&status=
+       → { items: [{ user_email_masked, registered_at, first_payment_at,
+                     commission_rub, status }], total }
 
-GET    /api/partners/me/commissions
-       query: ?from=&to=&page=
-       → { items: [{ payment_date, referral_email_masked, amount, percent, tier, status }], total, summary }
+GET    /api/partners/me/commissions?from=&to=&page=
+       → { items: [...], total, summary: { accrued, paid, reversed }}
 
 POST   /api/partners/me/payout
-       body: { amount_kopecks, method, destination }
-       → создание заявки на вывод
+       Body: { amount_kopecks, method, destination: {...} }
 
 GET    /api/partners/me/payouts
-       → история выводов
+```
 
-GET    /api/partners/me/promo
-       → { promo_text_templates, banners, qr_url, scripts_for_dm }
+### Для админа
+
+```
+GET    /api/admin/partners?status=&page=
+POST   /api/admin/partners/{id}/approve
+POST   /api/admin/partners/{id}/reject
+POST   /api/admin/partners/{id}/ban
+
+GET    /api/admin/payouts?status=requested
+POST   /api/admin/payouts/{id}/approve
+POST   /api/admin/payouts/{id}/mark-paid     Body: { external_tx_id }
+POST   /api/admin/payouts/{id}/reject
 ```
 
 ### Tracking
 
 ```
 POST   /api/partners/track-click
-       body: { ref_code, referrer, user_agent, utm_* }
+       Body: { ref_code, referrer, utm_* }
        → 204
 ```
 
-### Admin
-
-```
-GET    /api/admin/partners
-       query: ?status=&tier=&page=
-       → список партнёров с метриками
-
-POST   /api/admin/partners/{id}/approve
-POST   /api/admin/partners/{id}/reject  body: { reason }
-POST   /api/admin/partners/{id}/ban     body: { reason }
-POST   /api/admin/partners/{id}/set-tier body: { tier }  // ручное переопределение
-
-GET    /api/admin/payouts?status=requested
-POST   /api/admin/payouts/{id}/approve
-POST   /api/admin/payouts/{id}/reject   body: { reason }
-POST   /api/admin/payouts/{id}/mark-paid body: { external_tx_id }
-```
-
 ---
 
-## 8. UI: кабинет партнёра
+## 🖥 UI: кабинет партнёра
 
 Маршрут: `/partners/dashboard` (требует auth + partner_profile.status=active)
 
-### Главная страница кабинета
-
 ```
-┌──────────────────────────────────────────────────────┐
-│  [Header с навигацией]                                │
-├──────────────────────────────────────────────────────┤
-│                                                       │
-│  Привет, [Имя] 👋                                     │
-│  Твой уровень: [Эксперт ★]   30% с платежей          │
-│                                                       │
-│  ┌─────────────┬─────────────┬─────────────┐         │
-│  │ ВСЕГО       │ АКТИВНЫЕ    │ К ВЫПЛАТЕ   │         │
-│  │ 47          │ 12 / 30     │ 23 740 ₽    │         │
-│  │ рефералов   │ до Лидера   │ [Вывести]   │         │
-│  └─────────────┴─────────────┴─────────────┘         │
-│                                                       │
-│  ┌──────────────────────────────────────────┐        │
-│  │  Твоя реферальная ссылка                  │        │
-│  │  aiavitologpro.ru/?ref=lera2026  [📋]    │        │
-│  │  [QR-код]                                 │        │
-│  └──────────────────────────────────────────┘        │
-│                                                       │
-│  ─── ПОСЛЕДНИЕ НАЧИСЛЕНИЯ ──────────────────         │
-│  • 29 май · client@*****.ru · 1 287 ₽ (30%)          │
-│  • 28 май · ivan@*****.ru · 858 ₽ (30%)              │
-│  • 27 май · maria@*****.ru · 477 ₽ (30%)             │
-│  [Все начисления →]                                   │
-│                                                       │
-│  ─── ПРОМО-МАТЕРИАЛЫ ───────────────────────         │
-│  [Тексты постов] [Скрипты для DM] [Баннеры]          │
-│                                                       │
-└──────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│  Партнёрский кабинет                                          │
+├──────────────────────────────────────────────────────────────┤
+│                                                                │
+│  Привет, [Имя] 👋                                              │
+│                                                                │
+│  ┌──────────────┬──────────────┬──────────────────┐          │
+│  │ ВСЕГО         │ ОПЛАТИЛИ      │ К ВЫПЛАТЕ         │          │
+│  │ 47            │ 12             │ 3 540 ₽           │          │
+│  │ переходов     │ из 23 регистр  │ [Вывести]         │          │
+│  └──────────────┴──────────────┴──────────────────┘          │
+│                                                                │
+│  ┌──────────────────────────────────────────────┐            │
+│  │  Твоя реферальная ссылка                       │            │
+│  │  aiavitologpro.ru/?ref=lera2026     [📋]      │            │
+│  │  [QR-код для постов]                          │            │
+│  └──────────────────────────────────────────────┘            │
+│                                                                │
+│  ─── ПОСЛЕДНИЕ НАЧИСЛЕНИЯ ────────────────────────           │
+│  • 01.06 · u***@gmail.com   +297 ₽   первое пополн.          │
+│  • 30.05 · m***@gmail.com   +117 ₽                            │
+│  • 28.05 · i***@avito.ru    +30  ₽                            │
+│  [Все начисления →]                                            │
+│                                                                │
+│  ─── ПРОМО-МАТЕРИАЛЫ ─────────────────────────────           │
+│  [Тексты для постов] [Скрипты DM] [Баннеры]                  │
+│                                                                │
+└──────────────────────────────────────────────────────────────┘
 ```
 
-### Прочие страницы кабинета
+---
 
-- `/partners/dashboard/referrals` — таблица рефералов с фильтрами
-- `/partners/dashboard/commissions` — все начисления
-- `/partners/dashboard/payouts` — история и новая заявка на вывод
-- `/partners/dashboard/promo` — промо-материалы для скачивания
-- `/partners/dashboard/settings` — реквизиты, контакты, оферта
+## 🛡 Безопасность и edge-cases
+
+### Anti-fraud
+
+1. **Self-referral**: проверка `partner.user_id !== referred.user_id` в момент привязки
+2. **Платежи с карты партнёра** (если возможно вытащить hash из метаданных Точки):
+   - Если карта last4 партнёра = last4 в платеже реферала → fraud-флаг
+   - Не блокируем автоматически, помечаем для админ-проверки
+3. **Подозрительная регистрация-пополнение-возврат**: если реферал пополнил 1 раз и сразу запросил возврат → автоматический ban реферала + reverse commission
+
+### Idempotency платежей
+
+Webhook Точки может прийти 2+ раза за один и тот же `payment_id`.
+
+**Защита:**
+- Платёж → `wallet_transaction` с `idempotency_key = 'topup:{payment_id}'` (уже есть в wallet-ТЗ)
+- Партнёрская комиссия → флаг `user.partner_commission_paid = True` на User
+
+При повторном webhook'е:
+1. `topup` идемпотентен → создание `wallet_tx` пропускается
+2. `on_topup_success` не вызовется снова, потому что повторный topup не создан
+
+### Что НЕ делать
+
+❌ **Хранить ref_code в localStorage** (только cookie с SameSite=Lax)
+❌ **Передавать ref_code в URL после первого захода** (чистим URL)
+❌ **Партнёрство без подписанной оферты** (юр. защита)
 
 ---
 
-## 9. Промо-материалы (для партнёров)
+## 📋 Чеклист запуска
 
-Должны быть готовы к запуску (тексты сделаю я, Иван хостит):
-
-- 3 текста для постов (короткий / средний / длинный)
-- 2 скрипта для DM клиентам
-- Баннер 1080×1080 + 1920×1080 + 1080×1920
-- QR-код с реф-ссылкой (генерится на лету по `/api/partners/me/promo/qr.png`)
-- PDF презентация-однопейджер «Что такое AI Авитолог PRO»
-
----
-
-## 10. Безопасность
-
-### 10.1 Anti-fraud
-
-- **Self-referral detection**: при привязке проверяем `partner.user_id !== referred.id`
-- **IP / fingerprint logging**: если 5+ регистраций с одного IP/fingerprint за час → ручная проверка
-- **Платёж с карты партнёра**: если карта последних 4 цифр совпадает с картой партнёра → fraud-флаг
-- **Подозрительный паттерн платежей**: если реферал подключает Basic, оплачивает 1 раз, потом возврат → автоматический бан реферала + reverse commission
-
-### 10.2 GDPR / 152-ФЗ
-
-- В кабинете партнёра email/имя рефералов **маскируются**: `m***@gmail.com`
-- Партнёр **не видит** телефон/полное имя реферала
-- Можно показывать только: дата регистрации, статус (платит / не платит), сумма заработка с него
-
-### 10.3 Лимиты на API
-
-- `/api/partners/track-click` — rate-limit 60/min по IP
-- `/api/partners/me/payout` — макс. 1 заявка в день
-- `/api/admin/partners/{id}/set-tier` — audit-log
+- [ ] 5 миграций БД применены
+- [ ] Cookie-tracking работает (тест: клик → cookie → регистрация → User.referred_by_partner_id)
+- [ ] Webhook-handler начисляет комиссию при первом пополнении
+- [ ] Повторный webhook не приводит к двойному начислению
+- [ ] Refund откатывает комиссию (status=reversed)
+- [ ] Форма заявки + admin approve/reject
+- [ ] Кабинет партнёра с балансом и историей
+- [ ] Заявка на вывод (от 1 000 ₽) + ручная обработка админом
+- [ ] Оферта партнёра подписывается при apply
+- [ ] Тестовый партнёр-аккаунт прошёл полный flow
 
 ---
 
-## 11. Метрики мониторинга
+## 📊 Метрики мониторинга
 
-В админке/Grafana:
-
-- Кол-во активных партнёров по tier'ам
-- Конверсия Click → Registration (по партнёрам)
-- Конверсия Registration → First Payment (по партнёрам)
-- LTV реферала vs LTV прямого клиента
-- Распределение выплат (mean, median, p95)
-- Месячная стоимость программы (% от MRR)
+- Количество активных партнёров
+- Conv Click → Registration (по партнёрам)
+- Conv Registration → First Payment (по партнёрам)
+- Средний commission на партнёра/месяц
+- % выручки уходящий на партнёрку
 
 **Бюджет программы (план):**
-- К концу 1 года: программа = 10–15% от MRR
-- К концу 2 года: 20–25% от MRR
-- Если выше 30% → сигнал к пересмотру условий
+- К концу 1 года: партнёрка = 5–10% от total пополнений
+- Если выше 15% → сигнал к пересмотру условий
 
 ---
 
-## 12. Этапы внедрения
+## 🚀 Дальнейшее развитие (НЕ в MVP)
 
-### Этап 1 — MVP (1–2 недели)
+После того как 30%-модель отработает 2–3 месяца, можно добавить:
 
-1. Миграции БД (5 таблиц)
-2. Click-tracking (cookie + endpoint)
-3. Привязка реферала на регистрации
-4. Начисление commission на платежах
-5. Простая форма заявки + ручной approve в админке
-6. Минимальный кабинет (ссылка, балансы, реферал-список)
-7. Заявка на вывод (без автомата — обрабатываю я)
+- **Tier'ы**: топ-партнёры (от 50 платящих) получают повышенный % на новых рефералов
+- **Recurring**: 10% lifetime со всех последующих пополнений (доп. мотивация лояльным)
+- **Промокоды клиентам**: персональный код с бонусом +5% к зачислению
+- **Лидерборд месяца**: топ-10 партнёров с доп. бонусом
 
-### Этап 2 — автоматизация (+1 неделя)
-
-8. Cron пересчёта tier'ов
-9. Обработка refund/chargeback
-10. Промо-материалы в кабинете
-11. Уведомления (новый реферал заплатил, tier повышен, выплата проведена)
-
-### Этап 3 — масштаб (когда будет 50+ партнёров)
-
-12. Авто-выплаты через API (Юкасса payouts / СБП API)
-13. Доп. отчёты для админа
-14. Anti-fraud-эвристики (см. §10.1)
+Все эти расширения **не требуют переписывания базовой модели**.
 
 ---
 
-## 13. Связь с существующими модулями
-
-- **Используется существующая таблица** `users` (партнёр = user с partner_profile)
-- **Используется существующая таблица** `payments` (для начислений)
-- **Использует** existing webhook платежей — добавить хук
-- **Использует** existing email/TG-уведомления
-
-**НЕ дублирует** `wallet` модуль из ТЗ-кошелька — партнёрский баланс отдельная сущность (`partner_commission` + `partner_payout`).
-
----
-
-## 14. Что НЕ входит в MVP (опционально позже)
-
-- ❌ Многоуровневая партнёрка (MLM) — только 1 уровень
-- ❌ Партнёрские купоны на скидку клиенту — пока без бонуса клиенту
-- ❌ Подпартнёры (партнёр приводит партнёра)
-- ❌ A/B-тестирование посадочных по партнёрам
-- ❌ Лидерборд («топ-10 партнёров месяца») — если зайдёт, добавим как геймификацию
-
----
-
-## 15. Открытые вопросы (нужно решить с Лерой)
-
-- [ ] **Минимум активных для повышения tier'а** — точно 10 / 30 или скорректируем?
-- [ ] **Реверс начислений** — за какой срок принимаем chargeback (30 / 60 / 90 дней)?
-- [ ] **Self-onboarding** — после approve партнёр сам заходит в кабинет, или нужен welcome-call?
-- [ ] **Промо-материалы** — кто готовит дизайн (Лера сама / дизайнер)?
-- [ ] **Налоги** — закрепляем оферту что партнёр сам платит НДФЛ/НПД, или удерживаем?
-- [ ] **Срок ожидания approve** — какой SLA на ручную модерацию (24ч / 48ч / 7д)?
-
----
-
-## 16. Чеклист для запуска
-
-- [ ] Миграции БД применены
-- [ ] Click tracking работает (e2e тест: клик → cookie → регистрация → referral создан)
-- [ ] Начисление commission работает (e2e тест: реферал платит → commission создан)
-- [ ] Cron tier-recalc запущен и протестирован
-- [ ] Форма заявки на лендинге работает
-- [ ] Админка для approve / reject готова
-- [ ] Кабинет партнёра минимальный готов
-- [ ] Заявка на вывод + ручная обработка работает
-- [ ] Юридически: оферта партнёра подписывается при apply
-- [ ] Тестовый партнёр-аккаунт создан, прошли весь flow
-- [ ] Уведомления (email/TG) на ключевых событиях работают
-
----
-
-**Лера, скажи если что-то непонятно или нужно перераспределить акценты.**
-
-После согласования открытых вопросов (§15) Иван может начинать с Этапа 1.
+**Дата:** 2026-06-01 · **Версия:** 2.0 (wallet-adapted)
