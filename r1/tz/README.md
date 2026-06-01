@@ -21,16 +21,18 @@
 
 Запуск **wallet-модели** с парсером ниши, чатом с AI Авитологом, проверкой позиций, анализом XLS, генератором фото — все инструменты под единой кошелёк-моделью.
 
-## 6 документов — читать в этом порядке
+## 📚 8 документов — читать в этом порядке
 
 | # | Файл | О чём | Для кого |
 |---|---|---|---|
 | 0 | [00_WALLET_MODEL.md](00_WALLET_MODEL.md) | **🎯 Модель монетизации** — цены, пакеты, принципы | Все |
-| 1 | [01_parser_integration.md](01_parser_integration.md) | Архитектура парсера: worker, VPS, эндпоинты, Playwright | Бэк |
-| 2 | [02_wallet_backend_final.md](02_wallet_backend_final.md) | **🆕 Бэк кошелька** — миграции БД, сервис, API, Точка Банк | Бэк |
-| 3 | [03_backend_deep_dive.md](03_backend_deep_dive.md) | Production-углы: race conditions, observability, security, testing, ops | Бэк |
-| 4 | [04_partners_program.md](04_partners_program.md) | ⚠️ Партнёрская программа (адаптация под wallet требуется) | Бэк (позже) |
-| 5 | [05_frontend_wallet_components.md](05_frontend_wallet_components.md) | **🆕 Фронт-компоненты** для wallet UI | Лера + AI |
+| 1 | [06_WORKPLAN_FOR_IVAN.md](06_WORKPLAN_FOR_IVAN.md) | **⭐ План работы Ивана** — что делать ПЕРВЫМ, что потом, почему | Иван (читать первым!) |
+| 2 | [01_parser_integration.md](01_parser_integration.md) | Архитектура парсера: worker, VPS, эндпоинты, Playwright | Бэк |
+| 3 | [02_wallet_backend_final.md](02_wallet_backend_final.md) | **🆕 Бэк кошелька** — миграции БД, сервис, API, Точка Банк | Бэк |
+| 4 | [03_backend_deep_dive.md](03_backend_deep_dive.md) | Production-углы: race conditions, observability, security, testing, ops | Бэк |
+| 5 | [07_FUTURE_AVITO_INTEGRATION.md](07_FUTURE_AVITO_INTEGRATION.md) | **🔮 Архитектура под будущую интеграцию с Авито-аккаунтами** | Бэк (заложить в MVP) |
+| 6 | [04_partners_program.md](04_partners_program.md) | ⚠️ Партнёрская программа (адаптация под wallet требуется) | Бэк (позже) |
+| 7 | [05_frontend_wallet_components.md](05_frontend_wallet_components.md) | **🆕 Фронт-компоненты** для wallet UI | Лера + AI |
 
 📁 [archive/](archive/) — **устаревшие документы** (модель с подписками, не использовать).
 
