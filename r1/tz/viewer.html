@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Авитолог PRO — ТЗ для Ивана</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<style>
+  :root {
+    --bg: #0E1118;
+    --bg-2: #141926;
+    --text: #E8EAF0;
+    --muted: #8A90A8;
+    --border: rgba(255, 255, 255, 0.08);
+    --brand: #6F42C1;
+    --brand-2: #9A7FE0;
+    --brand-soft: rgba(111, 66, 193, 0.15);
+    --green: #34d399;
+    --amber: #f59e0b;
+    --code-bg: #0A0D14;
+    --inline-code-bg: rgba(154, 127, 224, 0.12);
+  }
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    background-image: radial-gradient(ellipse at top, rgba(111, 66, 193, 0.05), transparent 60%);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* Top nav */
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(14, 17, 24, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+  }
+  .topbar-inner {
+    max-width: 880px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--brand-2);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 12px;
+    background: rgba(154, 127, 224, 0.08);
+    border: 1px solid rgba(154, 127, 224, 0.20);
+    border-radius: 999px;
+    transition: background .15s;
+  }
+  .back-link:hover { background: rgba(154, 127, 224, 0.16); }
+  .back-link svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.5; fill: none; }
+  .doc-name {
+    font-size: 13px;
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Main content */
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+  .loading, .error {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .error h2 { color: #ef4444; }
+
+  /* ============ Markdown styling ============ */
+  .md h1, .md h2, .md h3, .md h4 {
+    color: #FFFFFF;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    margin: 2em 0 0.6em;
+  }
+  .md h1:first-child, .md h2:first-child { margin-top: 0; }
+
+  .md h1 {
+    font-size: 32px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #C5B0F0 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .md h2 {
+    font-size: 22px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .md h3 { font-size: 18px; }
+  .md h4 { font-size: 16px; color: var(--brand-2); }
+
+  .md p { margin: 0.8em 0; color: rgba(232, 234, 240, 0.9); }
+  .md strong { color: #FFFFFF; font-weight: 700; }
+  .md em { color: rgba(255, 255, 255, 0.9); }
+
+  /* Links */
+  .md a {
+    color: var(--brand-2);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(154, 127, 224, 0.30);
+    transition: border-color .15s;
+  }
+  .md a:hover { border-color: var(--brand-2); }
+
+  /* Code */
+  .md code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    font-size: 0.88em;
+    color: #C5B0F0;
+    background: var(--inline-code-bg);
+    padding: 2px 6px;
+    border-radius: 5px;
+    border: 1px solid rgba(154, 127, 224, 0.18);
+  }
+  .md pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 1.2em 0;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  .md pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #E8EAF0;
+    font-size: inherit;
+  }
+
+  /* Lists */
+  .md ul, .md ol { padding-left: 1.6em; margin: 0.8em 0; }
+  .md li { margin: 0.35em 0; color: rgba(232, 234, 240, 0.9); }
+  .md ul li::marker { color: var(--brand-2); }
+
+  /* Blockquote */
+  .md blockquote {
+    margin: 1.2em 0;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, rgba(111, 66, 193, 0.10), rgba(154, 127, 224, 0.02));
+    border-left: 3px solid var(--brand);
+    border-radius: 0 12px 12px 0;
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .md blockquote p { margin: 0.3em 0; }
+  .md blockquote p:first-child { margin-top: 0; }
+  .md blockquote p:last-child { margin-bottom: 0; }
+
+  /* Tables */
+  .md table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.2em 0;
+    font-size: 14px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .md thead { background: rgba(111, 66, 193, 0.10); }
+  .md th, .md td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .md th {
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .md tbody tr:last-child td { border-bottom: none; }
+  .md tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
+
+  /* HR */
+  .md hr {
+    border: none;
+    height: 1px;
+    background: var(--border);
+    margin: 2.5em 0;
+  }
+
+  /* Checkboxes (task lists) */
+  .md input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border: 1.5px solid rgba(154, 127, 224, 0.40);
+    border-radius: 4px;
+    margin-right: 6px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+  .md input[type="checkbox"]:checked {
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    border-color: var(--brand-2);
+  }
+  .md input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 1px; left: 4px;
+    width: 4px; height: 8px;
+    border: solid #FFFFFF;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .md li:has(input[type="checkbox"]) {
+    list-style: none;
+    margin-left: -1.6em;
+  }
+
+  /* Footer */
+  .doc-footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .doc-footer a { color: var(--brand-2); text-decoration: none; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .md h1 { font-size: 26px; }
+    .md h2 { font-size: 20px; }
+    main { padding: 24px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="back-link" href="../">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      К списку
+    </a>
+    <span class="doc-name" id="doc-name">Загрузка...</span>
+  </div>
+</div>
+
+<main>
+  <div id="content" class="md">
+    <div class="loading">Загружаем документ...</div>
+  </div>
+
+  <div class="doc-footer">
+    <span>Лера · TG <a href="https://t.me/valeriia_avitolog">@valeriia_avitolog</a></span>
+    <span>AI Авитолог PRO — пакет R1</span>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script>
+  // Get file from query: ?file=06_WORKPLAN_FOR_IVAN.md
+  const params = new URLSearchParams(window.location.search);
+  const file = params.get('file');
+  const docNameEl = document.getElementById('doc-name');
+  const contentEl = document.getElementById('content');
+
+  if (!file || !/^[\w\-]+\.md$/.test(file)) {
+    contentEl.innerHTML = '<div class="error"><h2>Файл не указан</h2><p>Откройте через главную страницу.</p></div>';
+    docNameEl.textContent = '—';
+  } else {
+    docNameEl.textContent = file;
+    document.title = file + ' — AI Авитолог PRO';
+
+    // Configure marked
+    marked.setOptions({
+      gfm: true,
+      breaks: false,
+      headerIds: true,
+      mangle: false,
+    });
+
+    fetch(file)
+      .then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      })
+      .then(md => {
+        contentEl.innerHTML = marked.parse(md);
+
+        // Scroll to anchor if present
+        if (window.location.hash) {
+          const target = document.querySelector(window.location.hash);
+          if (target) setTimeout(() => target.scrollIntoView({behavior: 'smooth', block: 'start'}), 50);
+        }
+      })
+      .catch(err => {
+        contentEl.innerHTML = '<div class="error"><h2>Ошибка загрузки</h2><p>' + err.message + '</p></div>';
+      });
+  }
+</script>
+</body>
+</html>
