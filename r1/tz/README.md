@@ -48,6 +48,7 @@
 | 6 | [04_partners_program.md](04_partners_program.md) | ✅ **Партнёрка под wallet** — 30% разовый бонус, простая логика (~3-4 дня) | Бэк (позже) |
 | 7 | [05_frontend_wallet_components.md](05_frontend_wallet_components.md) | **🆕 Фронт-компоненты** для wallet UI | Лера + AI |
 | 8 | [08_TG_BOT_FOR_LERA.md](08_TG_BOT_FOR_LERA.md) | **🆕 TG-бот для Леры** — кампании, воронки, рассылки (R1.5) | Бэк (после R1) |
+| 9 | [09_TOCHKA_INTEGRATION.md](09_TOCHKA_INTEGRATION.md) | **🆕 Точка Банк + облачная касса** — ответ Точки, архитектура чеков | Бэк (R1) |
 
 📁 [archive/](archive/) — **устаревшие документы** (модель с подписками, не использовать).
 
