@@ -47,6 +47,7 @@
 | 5 | [07_FUTURE_AVITO_INTEGRATION.md](07_FUTURE_AVITO_INTEGRATION.md) | **🔮 Архитектура под будущую интеграцию с Авито-аккаунтами** | Бэк (заложить в MVP) |
 | 6 | [04_partners_program.md](04_partners_program.md) | ✅ **Партнёрка под wallet** — 30% разовый бонус, простая логика (~3-4 дня) | Бэк (позже) |
 | 7 | [05_frontend_wallet_components.md](05_frontend_wallet_components.md) | **🆕 Фронт-компоненты** для wallet UI | Лера + AI |
+| 8 | [08_TG_BOT_FOR_LERA.md](08_TG_BOT_FOR_LERA.md) | **🆕 TG-бот для Леры** — кампании, воронки, рассылки (R1.5) | Бэк (после R1) |
 
 📁 [archive/](archive/) — **устаревшие документы** (модель с подписками, не использовать).
 
