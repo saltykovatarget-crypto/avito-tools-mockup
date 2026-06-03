@@ -50,6 +50,19 @@
 | 8 | [08_TG_BOT_FOR_LERA.md](08_TG_BOT_FOR_LERA.md) | **🆕 TG-бот для Леры** — кампании, воронки, рассылки (R1.5) | Бэк (после R1) |
 | 9 | [09_TOCHKA_INTEGRATION.md](09_TOCHKA_INTEGRATION.md) | **🆕 Точка Банк + облачная касса** — ответ Точки, архитектура чеков | Бэк (R1) |
 
+---
+
+## 🤖 Пакет AI v3.1 + парсер с vision (отдельная группа)
+
+| # | Файл | О чём | Для кого |
+|---|---|---|---|
+| 10 | [10_AI_PROMPT_PACK_README.md](10_AI_PROMPT_PACK_README.md) | **Обзор пакета** — что внутри, что меняется от v2.5 | Все (читать первым в этой группе) |
+| 11 | [11_AI_SYSTEM_PROMPT.md](11_AI_SYSTEM_PROMPT.md) | **Системный промпт v3.1** — вставляется в OpenAI API как `system` | Бэк (для интеграции) |
+| 12 | [12_AI_INSTRUCTION_EDITS.md](12_AI_INSTRUCTION_EDITS.md) | Правки к основной инструкции — УДАЛИТЬ / ЗАМЕНИТЬ / ДОБАВИТЬ | Лера |
+| 13 | [13_AI_RESPONSE_TEMPLATES.md](13_AI_RESPONSE_TEMPLATES.md) | Готовые формулировки ответов для 5 веток и платных действий | Лера + Бэк (few-shot) |
+| 14 | [14_AI_BACKEND_INTEGRATION.md](14_AI_BACKEND_INTEGRATION.md) | **🔥 ТЗ интеграции AI ↔ бэкенд** — контекст, парсинг через историю, action buttons, function calling | **Иван** |
+| 15 | [15_PARSER_VISION_ARCHITECTURE.md](15_PARSER_VISION_ARCHITECTURE.md) | **🔥 Vision-архитектура парсера** — GPT-4o, delta топ-5 vs рынок, кеш фото, инсайты | **Иван** |
+
 📁 [archive/](archive/) — **устаревшие документы** (модель с подписками, не использовать).
 
 ## Кликабельные мокапы UI
