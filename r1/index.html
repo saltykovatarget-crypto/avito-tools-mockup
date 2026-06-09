@@ -223,6 +223,18 @@
   </div>
   <p class="subtitle">Релиз R1 — wallet-модель · обновлено 01.06.2026</p>
 
+  <!-- ============ WARNING про legacy ============ -->
+  <div style="background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.40);border-radius:14px;padding:16px 20px;margin:16px 0 24px;color:#fef3c7;font-size:14px;line-height:1.55">
+    <strong style="color:#f59e0b;display:block;margin-bottom:6px">⚠️ Старые папки — НЕ реализовывать</strong>
+    Если увидишь эти папки в репозитории — это snapshot старой подписочной модели, до миграции на кошелёк:
+    <ul style="margin:8px 0 0 18px;padding:0">
+      <li><code>archive_old_ui/</code> — старые HTML-мокапы (cabinet/parser/wallet) под подписки и квоты</li>
+      <li><code>tz/archive/</code> — устаревшие ТЗ (тарифы 1590/4290/9990 ₽, квоты, гибридные списания)</li>
+      <li><code>tz/03_backend_deep_dive.md</code> — содержит legacy-разделы про квоты. Бери только observability/security/race conditions. См. баннер в начале файла.</li>
+    </ul>
+    Актуальная модель — <strong>wallet-only</strong> (рубли на балансе, без подписок и лимитов). См. <code>tz/00_WALLET_MODEL.md</code>.
+  </div>
+
   <!-- ============ HERO для Ивана ============ -->
   <div class="hero">
     <div class="hero-eyebrow">
@@ -447,6 +459,17 @@
           <span class="card-tag card-tag--new">R1 · Иван</span>
         </div>
         <div class="card-meta">Витрина инструментов + inline-карточки в AI-чате. Фронт готов у Леры. От Ивана: роутинг, API создания чата с tool meta, таблица tool_runs, история. ~3 дня.</div>
+      </div>
+      <span class="arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </a>
+    <a class="mockup-card mockup-card--featured" href="tz/viewer.html?file=19_VITE_INTEGRATION.md" target="_blank">
+      <div class="icon-box"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+      <div class="card-content">
+        <div class="card-title">
+          <span>19. Vite ↔ FastAPI — интеграция</span>
+          <span class="card-tag card-tag--new">R1 · Иван · читать первым</span>
+        </div>
+        <div class="card-meta">Как собирать фронт, готовый nginx-конфиг, полный список API endpoints с типами, SSE-стрим, Demo Mode auto-fallback. Закрывает 90% вопросов «как подружить».</div>
       </div>
       <span class="arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
     </a>
