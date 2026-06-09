@@ -62,7 +62,9 @@
 | 13 | [13_AI_RESPONSE_TEMPLATES.md](13_AI_RESPONSE_TEMPLATES.md) | Готовые формулировки ответов для 5 веток и платных действий | Лера + Бэк (few-shot) |
 | 14 | [14_AI_BACKEND_INTEGRATION.md](14_AI_BACKEND_INTEGRATION.md) | **🔥 ТЗ интеграции AI ↔ бэкенд** — контекст, парсинг через историю, action buttons, function calling | **Иван** |
 | 15 | [15_PARSER_VISION_ARCHITECTURE.md](15_PARSER_VISION_ARCHITECTURE.md) | **🔥 Vision-архитектура парсера** — GPT-4o, delta топ-5 vs рынок, кеш фото, инсайты | **Иван** |
-| 16 | [16_PARSER_SELLER_DYNAMIC_PRICING.md](16_PARSER_SELLER_DYNAMIC_PRICING.md) | **🆕 Парсер продавца** — динамическая цена 50+1₽/объявление, потолок 5K (R2) | Бэк (после R1) |
+| 16 | [16_PARSER_SELLER_DYNAMIC_PRICING.md](16_PARSER_SELLER_DYNAMIC_PRICING.md) | **🆕 Парсер продавца** — тарифная сетка 90/150/300/500/1000/2000 ₽, потолок 5K (R2) | Бэк (после R1) |
+| 17 | [17_AUDIT_TOOL.md](17_AUDIT_TOOL.md) | **🆕 Аудит объявлений** — комплекс XLS + парсер выдачи + AI-диагностика (290 ₽, R2) | Бэк (после R1) |
+| 18 | [18_TOOLS_PAGE_INTEGRATION.md](18_TOOLS_PAGE_INTEGRATION.md) | **🆕 Страница /tools** — витрина + связка с чатом, inline-suggestions, история запусков | Иван (R1) |
 
 📁 [archive/](archive/) — **устаревшие документы** (модель с подписками, не использовать).
 
