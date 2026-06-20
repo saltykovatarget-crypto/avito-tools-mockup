@@ -1,0 +1,4 @@
+node_modules/
+promo/out/
+promo/node_modules/
+*.mp4
