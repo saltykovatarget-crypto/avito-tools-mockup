@@ -221,19 +221,7 @@
     <img src="logo-header.png" class="logo-img" alt="" />
     <div class="title">AI Авитолог<span class="pro-badge">PRO</span></div>
   </div>
-  <p class="subtitle">Релиз R1 — wallet-модель · обновлено 01.06.2026</p>
-
-  <!-- ============ WARNING про legacy ============ -->
-  <div style="background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.40);border-radius:14px;padding:16px 20px;margin:16px 0 24px;color:#fef3c7;font-size:14px;line-height:1.55">
-    <strong style="color:#f59e0b;display:block;margin-bottom:6px">⚠️ Старые папки — НЕ реализовывать</strong>
-    Если увидишь эти папки в репозитории — это snapshot старой подписочной модели, до миграции на кошелёк:
-    <ul style="margin:8px 0 0 18px;padding:0">
-      <li><code>archive_old_ui/</code> — старые HTML-мокапы (cabinet/parser/wallet) под подписки и квоты</li>
-      <li><code>tz/archive/</code> — устаревшие ТЗ (тарифы 1590/4290/9990 ₽, квоты, гибридные списания)</li>
-      <li><code>tz/03_backend_deep_dive.md</code> — содержит legacy-разделы про квоты. Бери только observability/security/race conditions. См. баннер в начале файла.</li>
-    </ul>
-    Актуальная модель — <strong>wallet-only</strong> (рубли на балансе, без подписок и лимитов). См. <code>tz/00_WALLET_MODEL.md</code>.
-  </div>
+  <p class="subtitle">Релиз R1 — wallet-модель · обновлено 23.06.2026</p>
 
   <!-- ============ HERO для Ивана ============ -->
   <div class="hero">
@@ -243,16 +231,46 @@
     </div>
     <h2 class="hero-title">Открой план работ — там <span>всё расписано</span></h2>
     <p class="hero-desc">
-      <strong style="color:#fff">Целевой срок R1: 12–14 рабочих дней (~3 недели).</strong><br/>
-      Запускаем парсер + AI-чат + кошелёк + новый сайт. Фронт уже готов на 90% —
-      тебе остаётся бэкенд и подключение. Внутри: юр-статус (авансовый платёж),
-      4 вопроса к тебе и компактный план по дням.<br/>
-      <strong style="color:#fff">🆕 Свежий пакет AI v3.1 + vision-парсер</strong> — секция 2 ниже.
+      <strong style="color:#fff">R1 в работе — статус ниже, под кнопкой.</strong><br/>
+      Парсер выдачи уже гоняется на VPS, фронт собран у Леры. Осталось главное —
+      замкнуть финцепочку кошелька и подключить. Внутри плана: юр-статус
+      (авансовый платёж), вопросы к тебе и шаги по фазам.<br/>
+      <strong style="color:#fff">🆕 Vision обязателен</strong> — фото в отчёте + AI-чат читает фото (секция 2, док 15).
     </p>
     <a class="hero-cta" href="tz/viewer.html?file=06_WORKPLAN_FOR_IVAN.md" target="_blank" rel="noopener">
       Открыть план работ
       <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>
+  </div>
+
+  <!-- ============ СТАТУС: где мы по плану ============ -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px 24px;margin:0 0 32px">
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:800;margin-bottom:16px">📍 Где мы сейчас по плану · 23.06</div>
+    <div style="display:grid;gap:12px;font-size:13.5px;line-height:1.5">
+      <div style="display:flex;align-items:flex-start;gap:11px">
+        <span style="flex-shrink:0;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(52,211,153,0.15);color:var(--green);border:1px solid rgba(52,211,153,0.30)">Готово</span>
+        <span><strong>Парсер выдачи на VPS</strong> — прогон на 200 объявлений, XLSX живой. ⚠️ Антибот-403 после ~180 detail → нужны <strong>3 прокси</strong> + cooldown/очередь на объёме.</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:11px">
+        <span style="flex-shrink:0;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(52,211,153,0.15);color:var(--green);border:1px solid rgba(52,211,153,0.30)">Готово</span>
+        <span><strong>Образец отчёта — финал.</strong> Лист «Объявления» = 14 колонок, Сводка = KPI + 3 бар-блока (всё время / сегодня / топ-10 городов). «Ссылка» и «Фото» — кликабельные гиперссылки. Делаем точь-в-точь.</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:11px">
+        <span style="flex-shrink:0;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(245,158,11,0.15);color:var(--amber);border:1px solid rgba(245,158,11,0.30)">В работе</span>
+        <span><strong>Vision — обязательно.</strong> Фото объявлений отображаются в HTML-отчёте + AI-чат <strong>умеет читать фото</strong> (разбор объявлений по картинке). Без vision парсер = просто статистика. См. док 15.</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:11px">
+        <span style="flex-shrink:0;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(245,158,11,0.15);color:var(--amber);border:1px solid rgba(245,158,11,0.30)">В работе</span>
+        <span><strong>Кошелёк-биллинг</strong> (ветка <code>feat/parser-wallet-billing</code>) — резерв при старте и возврат при отмене есть. <strong>Нужна финцепочка:</strong> confirm на <code>done</code>, refund на <code>failed</code>, защита от гонки — через worker internal API. 🚫 До этого деплоить нельзя.</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:11px">
+        <span style="flex-shrink:0;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(138,144,168,0.15);color:var(--muted);border:1px solid rgba(138,144,168,0.30)">Ждём</span>
+        <span><strong>Дата запуска MVP</strong> — после integration plan назови ориентир. Это последнее число, которого не хватает в плане.</span>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-size:12.5px;color:var(--muted)">
+      💰 <strong style="color:var(--text)">Цена парсера выдачи — динамическая вилка по объёму:</strong> 50 → 90 ₽ · 100 → 160 ₽ · 150 → 220 ₽ · 200 → 270 ₽ · 300+ по запросу. <em>(Не путать с док 16 — там парсер ПРОДАВЦА, R2.)</em>
+    </div>
   </div>
 
   <!-- ============ 1. ТЗ — основное ============ -->
@@ -309,8 +327,11 @@
     <a class="mockup-card" href="tz/viewer.html?file=01_parser_integration.md" target="_blank">
       <div class="icon-box"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
       <div class="card-content">
-        <div class="card-title"><span>01. Парсер ниши — интеграция</span></div>
-        <div class="card-meta">Перенос с Mac на VPS, worker + Redis-очередь, эндпоинты, кэш.</div>
+        <div class="card-title">
+          <span>01. Парсер ниши — интеграция</span>
+          <span class="card-tag card-tag--new">Работает</span>
+        </div>
+        <div class="card-meta">✅ Уже на VPS, curl-detail, прогон на 200 объявлений. Осталось: 3 прокси + cooldown/очередь против 403, динамическая цена по объёму (вилка 90/160/220/270).</div>
       </div>
       <span class="arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
     </a>
